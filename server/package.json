@@ -1,0 +1,8 @@
+{
+  "name": "solo-mission",
+  "version": "1.0.0",
+  "description": "app for connecting artists & creatives",
+  "main": "server.js",
+  "author": "marie foxall",
+  "license": "MIT"
+}
