@@ -1,13 +1,17 @@
 import { createGlobalStyle } from "styled-components";
 
 const GlobalStyles = createGlobalStyle`
-/* @import url('https://fonts.googleapis.com/css2?family=Spartan&wght@600&display=swap'); */
 
-@import url("https://fonts.googleapis.com/css?family=Notable");
 body {
   font-family: "Spartan", sans-serif;
 }
-
+:root {
+  --forest-green: #004d00;
+  --coral: #ffa899;
+  --lavender: #b3b3ff;
+  --pale-yellow: #fcffe6;
+  --mint-green:  #79d2a6
+}
 
   *,
   *:before,
@@ -70,11 +74,13 @@ body {
     color: black;
 
   }
-  input{
+  input, button{
     font-family: 'Spartan', sans-serif;
   }
 
-  a{text-decoration: none;}
+  a{text-decoration: none;
+  padding: 0;
+  margin:0;}
 
 `;
 
