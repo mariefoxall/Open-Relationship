@@ -11,3 +11,21 @@ export const authenticateNewUser = (application) => ({
 export const signUpCodeNotFound = () => ({
   type: "SIGNUP_CODE_NOT_FOUND",
 });
+
+export const newUserInfoConfirmed = (application) => ({
+  type: "NEW_USER_INFO_CONFIRMED",
+  application,
+});
+
+export const userAlreadyExists = () => ({
+  type: "USER_ALREADY_EXISTS",
+});
+
+export const succesfullycreatedNewUser = () => ({
+  type: "SUCCESSFULLY_CREATED_NEW_USER",
+});
+
+export const userLoggedIn = (data) => ({
+  type: "USER_LOGGED_IN",
+  data,
+});
