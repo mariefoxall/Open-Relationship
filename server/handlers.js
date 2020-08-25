@@ -1,5 +1,7 @@
 const { MongoClient, ObjectID } = require("mongodb");
 require("dotenv").config();
+const bcrypt = require("bcrypt");
+
 const { MONGO_URI } = process.env;
 console.log(MONGO_URI);
 const assert = require("assert");
@@ -162,6 +164,7 @@ const confirmUserDetails = async (req, res) => {
         longForm: longForm,
         reasons: reasons,
         editNumber: req.body.editNumber,
+        signUpCode: "",
       },
     };
     await client.connect();
@@ -181,7 +184,6 @@ const confirmUserDetails = async (req, res) => {
 
 const createNewUser = async (req, res) => {
   const client = await MongoClient(MONGO_URI, options);
-  const newUserDetails = req.body;
   const email = req.body.email;
   try {
     await client.connect();
@@ -195,6 +197,9 @@ const createNewUser = async (req, res) => {
         message: "this user already exists!",
       });
     }
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(req.body.password, salt);
+    const newUserDetails = { email: email, password: hashedPassword };
     await db.collection("users").insertOne(newUserDetails);
     res.status(201).json({
       status: 201,
@@ -212,6 +217,73 @@ const createNewUser = async (req, res) => {
   client.close();
 };
 
+const verifyUserForSignin = async (req, res) => {
+  const client = await MongoClient(MONGO_URI, options);
+  const email = req.body.email;
+  try {
+    const query = { email: email };
+    await client.connect();
+    const db = client.db("personal_project");
+    const verifiedUser = await db.collection("users").findOne(query);
+    console.log("verifiedUser", verifiedUser);
+    if (!verifiedUser) {
+      return res.status(400).json({
+        status: 400,
+        userNotFound: true,
+        message: "user not found.",
+      });
+    } else {
+      validPassword = await bcrypt.compare(
+        req.body.password,
+        verifiedUser.password
+      );
+      console.log("validPassword", validPassword);
+      if (!validPassword) {
+        return res.status(400).json({
+          status: 400,
+          invalidPassword: true,
+          message: "incorrect password",
+        });
+      } else {
+        return res.status(200).json({
+          status: 200,
+          data: verifiedUser.email,
+          message: "user signed in",
+        });
+      }
+    }
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ status: 500, message: error.message });
+  }
+  client.close();
+};
+
+const getUserDetails = async (req, res) => {
+  const client = await MongoClient(MONGO_URI, options);
+  console.log("req.body", req.body);
+  const email = req.body.email;
+  try {
+    const query = { "contact.email": email };
+    await client.connect();
+    const db = client.db("personal_project");
+    const thisUser = await db.collection("applications").findOne(query);
+    if (thisUser) {
+      return res
+        .status(200)
+        .json({ status: 200, data: thisUser, message: "user found" });
+    } else {
+      return res
+        .status(200)
+        .json({ status: 200, data: thisUser, message: "user not found" });
+    }
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ status: 500, message: error.message });
+  }
+  client.close();
+};
+
 module.exports = {
   submitApplication,
   viewApplications,
@@ -220,4 +292,6 @@ module.exports = {
   checkApplicationForSignup,
   confirmUserDetails,
   createNewUser,
+  verifyUserForSignin,
+  getUserDetails,
 };

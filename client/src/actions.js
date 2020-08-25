@@ -29,3 +29,15 @@ export const userLoggedIn = (data) => ({
   type: "USER_LOGGED_IN",
   data,
 });
+
+export const loggingIn = (data) => ({
+  type: "LOGGING_IN",
+});
+
+export const userNotFound = () => ({
+  type: "USER_NOT_FOUND",
+});
+
+export const invalidPassword = () => ({
+  type: "INVALID_PASSWORD",
+});

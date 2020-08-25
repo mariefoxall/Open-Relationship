@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import Header from "./Header";
 
 const ApplicationForm = () => {
   //contact info
@@ -44,6 +45,8 @@ const ApplicationForm = () => {
 
   return (
     <>
+      <Header />
+      <Spacer />
       {applicationStatus === "pending" && (
         <form
           onSubmit={(ev) => {
@@ -333,6 +336,10 @@ const ApplicationForm = () => {
           <fieldset>
             <legend>DETAILS</legend>
             <label htmlFor="bio">BIO:</label>
+            <p>
+              Max. 500 characters - please provide a description of your work
+              and tell us your story!
+            </p>
             <textarea
               name="bio"
               id="bio"
@@ -341,10 +348,6 @@ const ApplicationForm = () => {
               onChange={(ev) => setBio(ev.target.value)}
               required
             />
-            <p>
-              Max. 500 characters - please provide a description of your work
-              and tell us your story!
-            </p>
             <label htmlFor="feelings">FEELINGS:</label>
             <textarea
               name="feelings"
@@ -421,5 +424,9 @@ const ApplicationForm = () => {
     </>
   );
 };
+
+const Spacer = styled.div`
+  height: 100px;
+`;
 
 export default ApplicationForm;

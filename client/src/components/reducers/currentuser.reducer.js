@@ -1,17 +1,25 @@
 const initialState = {
   userInfo: null,
+  status: "idle",
 };
 
 export default function currentuserReducer(state = initialState, action) {
+  console.log(action);
   switch (action.type) {
-    case "APP_REFRESH": {
-      return { ...state };
+    case "LOGGING_IN": {
+      return { ...state, status: "loading" };
     }
     case "USER_LOGGED_IN": {
-      return { ...state, userInfo: action.data };
+      return { ...state, userInfo: action.data, status: "logged-in" };
     }
     case "USER_LOGGED_OUT": {
       return initialState;
+    }
+    case "USER_NOT_FOUND": {
+      return { ...state, status: "idle" };
+    }
+    case "INVALID_PASSWORD": {
+      return { ...state, status: "idle" };
     }
     default: {
       return state;
@@ -20,7 +28,5 @@ export default function currentuserReducer(state = initialState, action) {
 }
 
 export const getCurrentUser = (state) => {
-  if (state.userInfo) {
-    return state.currentuser.userInfo;
-  }
+  return state.currentuser.userInfo;
 };
