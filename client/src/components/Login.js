@@ -10,6 +10,7 @@ import {
   loggingIn,
   userNotFound,
   invalidPassword,
+  userLoggedOut,
 } from "../actions";
 
 const Login = () => {
@@ -70,17 +71,19 @@ const Login = () => {
         console.log(json);
         if (json.userNotFound) {
           setBadUser(true);
+          setBadPassword(false);
           dispatch(userNotFound());
           return;
         } else if (json.invalidPassword) {
           setBadPassword(true);
+          setBadUser(false);
           dispatch(invalidPassword());
           return;
         } else {
           setBadPassword(false);
           setBadUser(false);
           dispatch(userLoggedIn(json.data));
-          history.push("/account");
+          history.push("/myaccount");
         }
       })
       .catch((error) => {
@@ -161,6 +164,26 @@ const Login = () => {
           <div>Signing in...</div>
         </LoginPage>
       )}
+      {currentUserStatus === "logged-in" && (
+        <LoginPage>
+          <LoginDiv>
+            <SignIn>
+              <p>DONE FOR NOW?</p>
+              <SignInForm>
+                <SignOutButton
+                  type="submit"
+                  onClick={(ev) => {
+                    ev.preventDefault();
+                    dispatch(userLoggedOut());
+                  }}
+                >
+                  SIGN OUT
+                </SignOutButton>
+              </SignInForm>
+            </SignIn>
+          </LoginDiv>
+        </LoginPage>
+      )}
     </>
   );
 };
@@ -207,6 +230,9 @@ const SignUpButton = styled.button`
 
 const SignInButton = styled(SignUpButton)`
   margin-top: 10px;
+`;
+const SignOutButton = styled(SignInButton)`
+  width: 100px;
 `;
 
 const SignIn = styled.div`

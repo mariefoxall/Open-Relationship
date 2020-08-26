@@ -41,3 +41,12 @@ export const userNotFound = () => ({
 export const invalidPassword = () => ({
   type: "INVALID_PASSWORD",
 });
+
+export const userLoggedOut = () => ({
+  type: "USER_LOGGED_OUT",
+});
+
+export const loggedInUserDetails = (data) => ({
+  type: "LOGGED_IN_USER_DETAILS",
+  data,
+});

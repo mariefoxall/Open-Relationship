@@ -8,6 +8,7 @@ import Account from "./Account";
 import ApplicationReview from "./ApplicationReview";
 import Login from "./Login";
 import Signup from "./Signup";
+import NotFound from "./NotFound";
 
 function App() {
   return (
@@ -27,7 +28,7 @@ function App() {
           <Route path="/scout">
             <Scout />
           </Route>
-          <Route path="/account">
+          <Route path="/myaccount">
             <Account />
           </Route>
           <Route path="/login">
@@ -35,6 +36,9 @@ function App() {
           </Route>
           <Route path="/signup">
             <Signup />
+          </Route>
+          <Route path="">
+            <NotFound />
           </Route>
         </Switch>
       </Router>
