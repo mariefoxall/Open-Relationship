@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { Link } from "react-router-dom";
 import ORlogo from "../assets/ORlogo.png";
 import { FiMenu, FiSearch } from "react-icons/fi";
+import SearchBar from "./SearchBar";
 
 const MobileHeader = () => {
   return (
@@ -18,6 +19,9 @@ const MobileHeader = () => {
         </HomeLink>
         <RightSide>
           <Search>
+            <SearchInput>
+              <SearchBar />
+            </SearchInput>
             <FiSearch size={30} />
           </Search>
           <Hamburger>
@@ -28,7 +32,7 @@ const MobileHeader = () => {
               <Spacer></Spacer>
               <StyledLink to="/scout">SCOUT</StyledLink>
               <StyledLink to="/messaging">MESSAGES</StyledLink>
-              <StyledLink to="/account">MY ACCOUNT</StyledLink>
+              <StyledLink to="/myaccount">MY ACCOUNT</StyledLink>
             </MobileNav>
           </Hamburger>
         </RightSide>
@@ -88,7 +92,6 @@ const MobileNav = styled.nav`
   position: absolute;
   top: 70px;
   right: 0;
-  display: flex;
   flex-direction: column;
   display: none;
   color: #79d2a6;
@@ -99,6 +102,7 @@ const MobileNav = styled.nav`
     text-align: right;
   }
 `;
+
 const StyledLink = styled(Link)`
   padding: 5px;
   color: #004d00;
@@ -113,10 +117,18 @@ const StyledLink = styled(Link)`
 const Search = styled.div`
   padding: 5px;
   color: var(--lavender);
+  display: flex;
+  justify-content: flex-end;
   &: hover {
     background-color: var(--pale-yellow);
     color: var(--forest-green);
   }
 `;
 
+const SearchInput = styled.div`
+  display: none;
+  ${Search}:hover & {
+    display: flex;
+  }
+`;
 export default MobileHeader;

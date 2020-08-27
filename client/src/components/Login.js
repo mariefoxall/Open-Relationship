@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import Header from "./Header";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   authenticateNewUser,
@@ -17,6 +17,7 @@ const Login = () => {
   const [signUpCode, setSignUpCode] = React.useState("");
   const dispatch = useDispatch();
   const currentUserStatus = useSelector((state) => state.currentuser.status);
+  console.log("currentUserStatus", currentUserStatus);
   let history = useHistory();
 
   const [username, setUsername] = React.useState("");
@@ -36,7 +37,7 @@ const Login = () => {
   const handleSignUp = (signUpCode) => {
     //check if applications collection has special code (only created when application is approved)
     //link to signup page with all of user's info entered and allow them to double-check
-    fetch(`/api/check-application-for-signup/${signUpCode}`)
+    fetch(`/check-application-for-signup/${signUpCode}`)
       .then((res) => res.json())
       .then((json) => {
         console.log(json);
@@ -58,11 +59,11 @@ const Login = () => {
     dispatch(loggingIn());
     //check if user exists in "users" collection
     //dispatch userLoggedIn (email, password)
-    fetch("/api/verify-user-for-signin", {
+    fetch("/verify-user-for-signin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email: username,
+        username: username,
         password: password,
       }),
     })
@@ -121,7 +122,7 @@ const Login = () => {
               <p>ONE OF US?</p>
               <SignInForm>
                 <TextInput
-                  placeholder="username (email address)"
+                  placeholder="username"
                   type="text"
                   name="username"
                   id="username"
@@ -156,6 +157,10 @@ const Login = () => {
                 </SignInButton>
               </SignInForm>
             </SignIn>
+            <Apply>
+              INTERESTED IN APPLYING?
+              <ApplyLink to="/applicationform">APPLY</ApplyLink>
+            </Apply>
           </LoginDiv>
         </LoginPage>
       )}
@@ -191,8 +196,8 @@ const Login = () => {
 const LoginPage = styled.div`
   display: flex;
   justify-content: center;
-  align-items: center;
-  height: calc(100vh - 100px);
+  /* align-items: center; */
+  min-height: calc(100vh - 100px);
   background-color: var(--pale-yellow);
 `;
 
@@ -200,7 +205,7 @@ const LoginDiv = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: space-around;
-  height: calc(100vh - 140px);
+  /* height: calc(100vh - 140px); */
 `;
 const SignUp = styled.form`
   padding: 10px;
@@ -241,6 +246,25 @@ const SignIn = styled.div`
   align-items: center;
   padding: 10px;
   background-color: var(--mint-green);
+`;
+
+const Apply = styled(SignIn)``;
+
+const ApplyLink = styled(Link)`
+  /* width: 80px; */
+  padding: 5px;
+  font-size: 14px;
+  text-align: center;
+  color: black;
+  background-color: var(--coral);
+  outline: none;
+  border: none;
+  margin-top: 10px;
+
+  &: hover {
+    cursor: pointer;
+    background-color: var(--lavender);
+  }
 `;
 
 const SignInForm = styled.form`

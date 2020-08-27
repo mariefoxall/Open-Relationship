@@ -1,5 +1,4 @@
 const initialState = {
-  email: null,
   userInfo: null,
   status: "idle",
 };
@@ -11,11 +10,11 @@ export default function currentuserReducer(state = initialState, action) {
       return { ...state, status: "loading" };
     }
     case "USER_LOGGED_IN": {
-      return { ...state, email: action.data, status: "logged-in" };
+      return { ...state, userInfo: action.data, status: "logged-in" };
     }
-    case "LOGGED_IN_USER_DETAILS": {
-      return { ...state, userInfo: action.data, status: "logged-in-info" };
-    }
+    // case "LOGGED_IN_USER_DETAILS": {
+    //   return { ...state, userInfo: action.data, status: "logged-in-info" };
+    // }
 
     case "USER_LOGGED_OUT": {
       return initialState;
@@ -32,12 +31,8 @@ export default function currentuserReducer(state = initialState, action) {
   }
 }
 
-export const getCurrentUserEmail = (state) => {
-  if (state.currentuser.email) {
-    return state.currentuser.email;
-  }
-};
-
 export const getCurrentUserInfo = (state) => {
-  return state.currentuser.userInfo;
+  if (state.currentuser.userInfo) {
+    return state.currentuser.userInfo;
+  }
 };

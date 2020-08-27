@@ -17,13 +17,15 @@ const DesktopHeader = () => {
       </HomeLink>
       <RightSide>
         <Search>
+          <SearchInput>
+            <SearchBar />
+          </SearchInput>
           <FiSearch size={20} />
-          <SearchBar />
         </Search>
         <DesktopNav>
           <StyledLink to="/scout">SCOUT</StyledLink>
           <StyledLink to="/messaging">MESSAGES</StyledLink>
-          <StyledLink to="/account">MY ACCOUNT</StyledLink>
+          <StyledLink to="/myaccount">MY ACCOUNT</StyledLink>
         </DesktopNav>
       </RightSide>
     </DesktopWrapper>
@@ -33,7 +35,7 @@ const RightSide = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  justify-content: space-between;
+  justify-content: flex-end;
 `;
 
 const DesktopWrapper = styled.div`
@@ -78,9 +80,22 @@ const StyledLink = styled(Link)`
 const Search = styled.div`
   padding: 5px;
   color: var(--mint-green);
+  display: flex;
+  position: absolute;
+  top: 10px;
+  right: 10px;
   &: hover {
     background-color: var(--pale-yellow);
     color: var(--forest-green);
   }
 `;
+
+const SearchInput = styled.div`
+  display: none;
+  position: relative;
+  ${Search}:hover & {
+    display: flex;
+  }
+`;
+
 export default DesktopHeader;

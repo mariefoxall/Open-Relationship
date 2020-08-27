@@ -148,22 +148,13 @@ const checkApplicationForSignup = async (req, res) => {
   client.close();
 };
 
-const confirmUserDetails = async (req, res) => {
+const confirmUser = async (req, res) => {
   const client = await MongoClient(MONGO_URI, options);
-  const contact = req.body.contact;
-  const portfolio = req.body.portfolio;
-  const longForm = req.body.longForm;
-  const reasons = req.body.reasons;
-  const email = contact.email;
+  const email = req.body.email;
   try {
     const query = { "contact.email": email };
     const update = {
       $set: {
-        contact: contact,
-        portfolio: portfolio,
-        longForm: longForm,
-        reasons: reasons,
-        editNumber: req.body.editNumber,
         signUpCode: "",
       },
     };
@@ -184,22 +175,33 @@ const confirmUserDetails = async (req, res) => {
 
 const createNewUser = async (req, res) => {
   const client = await MongoClient(MONGO_URI, options);
-  const email = req.body.email;
+  const contact = req.body.contact;
+  const portfolio = req.body.portfolio;
+  const longForm = req.body.longForm;
+  const reasons = req.body.reasons;
+  const username = req.body.username;
   try {
     await client.connect();
     const db = client.db("personal_project");
-    const result = await db.collection("users").findOne({ email: email });
+    const result = await db.collection("users").findOne({ username: username });
 
     if (result) {
       return res.status(201).json({
         status: 201,
-        userExists: true,
-        message: "this user already exists!",
+        usernameExists: true,
+        message: "this username already exists!",
       });
     }
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(req.body.password, salt);
-    const newUserDetails = { email: email, password: hashedPassword };
+    const newUserDetails = {
+      username: username,
+      password: hashedPassword,
+      contact,
+      portfolio,
+      longForm,
+      reasons,
+    };
     await db.collection("users").insertOne(newUserDetails);
     res.status(201).json({
       status: 201,
@@ -210,7 +212,6 @@ const createNewUser = async (req, res) => {
     console.log(error.message);
     res.status(500).json({
       status: 500,
-      data: newUserDetails,
       message: "sorry! this didn't work.",
     });
   }
@@ -219,9 +220,9 @@ const createNewUser = async (req, res) => {
 
 const verifyUserForSignin = async (req, res) => {
   const client = await MongoClient(MONGO_URI, options);
-  const email = req.body.email;
+  const username = req.body.username;
   try {
-    const query = { email: email };
+    const query = { username: username };
     await client.connect();
     const db = client.db("personal_project");
     const verifiedUser = await db.collection("users").findOne(query);
@@ -247,7 +248,7 @@ const verifyUserForSignin = async (req, res) => {
       } else {
         return res.status(200).json({
           status: 200,
-          data: verifiedUser.email,
+          data: verifiedUser,
           message: "user signed in",
         });
       }
@@ -259,24 +260,38 @@ const verifyUserForSignin = async (req, res) => {
   client.close();
 };
 
-const getUserDetails = async (req, res) => {
+// const getUserDetails = async (req, res) => {
+//   const client = await MongoClient(MONGO_URI, options);
+//   console.log("req.body", req.body);
+//   const email = req.body.email;
+//   try {
+//     const query = { "contact.email": email };
+//     await client.connect();
+//     const db = client.db("personal_project");
+//     const thisUser = await db.collection("applications").findOne(query);
+//     if (thisUser) {
+//       return res
+//         .status(200)
+//         .json({ status: 200, data: thisUser, message: "user found" });
+//     } else {
+//       return res
+//         .status(200)
+//         .json({ status: 200, data: thisUser, message: "user not found" });
+//     }
+//   } catch (error) {
+//     console.log(error.message);
+//     res.status(500).json({ status: 500, message: error.message });
+//   }
+//   client.close();
+// };
+
+const getUsers = async (req, res) => {
   const client = await MongoClient(MONGO_URI, options);
-  console.log("req.body", req.body);
-  const email = req.body.email;
   try {
-    const query = { "contact.email": email };
     await client.connect();
     const db = client.db("personal_project");
-    const thisUser = await db.collection("applications").findOne(query);
-    if (thisUser) {
-      return res
-        .status(200)
-        .json({ status: 200, data: thisUser, message: "user found" });
-    } else {
-      return res
-        .status(200)
-        .json({ status: 200, data: thisUser, message: "user not found" });
-    }
+    const users = await db.collection("users").find().toArray();
+    res.status(200).json({ status: 200, users: users });
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ status: 500, message: error.message });
@@ -284,14 +299,123 @@ const getUserDetails = async (req, res) => {
   client.close();
 };
 
+const getUserProfile = async (req, res) => {
+  const username = req.params.username;
+  const client = await MongoClient(MONGO_URI, options);
+  try {
+    const query = { username: username };
+    await client.connect();
+    const db = client.db("personal_project");
+    const thisUser = await db.collection("users").findOne(query);
+    if (thisUser) {
+      const thisUserProfile = await db
+        .collection("applications")
+        .findOne({ "contact.email": thisUser.email });
+      return res.status(200).json({ status: 200, data: thisUserProfile });
+    } else {
+      return res.status(200).json({ status: 200, userNotFound: true });
+    }
+  } catch (error) {
+    res.status(500).json({ status: 500, message: error.message });
+  }
+  client.close();
+};
+
+const makeConnection = async (req, res) => {
+  const client = await MongoClient(MONGO_URI, options);
+  const newConnection = req.body;
+  const requestingUser = req.body.requestingUser;
+  const receivingUser = req.body.receivingUser;
+  try {
+    await client.connect();
+    const query = {
+      requestingUser: requestingUser,
+      receivingUser: receivingUser,
+    };
+    const reverseQuery = {
+      requestingUser: receivingUser,
+      receivingUser: requestingUser,
+    };
+    const db = client.db("personal_project");
+    const youAlreadyAskedThem = await db
+      .collection("connections")
+      .findOne(query);
+    const theyAlreadyAskedYou = await db
+      .collection("connections")
+      .findOne(reverseQuery);
+    if (youAlreadyAskedThem) {
+      return res.status(201).json({
+        status: 201,
+        youAlreadyAskedThem: true,
+        message: "you have already requested to connect with this user.",
+      });
+    } else if (theyAlreadyAskedYou) {
+      return res.status(201).json({
+        status: 201,
+        theyAlreadyAskedYou: true,
+        message:
+          "this user has already requested to connect with you! Check your inbox.",
+      });
+    }
+    await db.collection("connections").insertOne(newConnection);
+    res.status(201).json({
+      status: 201,
+      data: newConnection,
+      message: "success! new connection requested.",
+    });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({
+      status: 500,
+      data: newConnection,
+      message: error.message,
+    });
+  }
+  client.close();
+};
+
+const updateProfilePic = async (req, res) => {
+  const client = await MongoClient(MONGO_URI, options);
+  console.log("req.body", req.body);
+  const username = req.body.username;
+  console.log("username inside updateProfilePic", username);
+  const profilePicURL = req.body.profilePicURL;
+  console.log("profilePicURL", profilePicURL);
+  try {
+    const query = { username: username };
+    const setProfilePic = { $set: { profilePicURL: profilePicURL } };
+    await client.connect();
+    const db = client.db("personal_project");
+    const r = await db.collection("users").updateOne(query, setProfilePic);
+    assert.equal(1, r.matchedCount);
+    assert.equal(1, r.modifiedCount);
+    res
+      .status(200)
+      .json({ status: 200, data: profilePicURL, message: "pic updated" });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ status: 500, message: error.message });
+  }
+  client.close();
+};
+
+// const checkConnection = async(req.res)=>{
+// const client = await MongoClient(MONGO_URI, options);
+// const userA = req.body.
+// }
+
 module.exports = {
   submitApplication,
   viewApplications,
   approveApplication,
   denyApplication,
   checkApplicationForSignup,
-  confirmUserDetails,
+  confirmUser,
   createNewUser,
   verifyUserForSignin,
-  getUserDetails,
+  // getUserDetails,
+  getUsers,
+  getUserProfile,
+  makeConnection,
+  updateProfilePic,
 };

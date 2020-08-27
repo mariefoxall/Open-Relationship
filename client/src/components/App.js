@@ -4,13 +4,31 @@ import GlobalStyles from "./GlobalStyles";
 import ApplicationForm from "./ApplicationForm";
 import Home from "./Home";
 import Scout from "./Scout";
-import Account from "./Account";
+import MyAccount from "./MyAccount";
 import ApplicationReview from "./ApplicationReview";
 import Login from "./Login";
 import Signup from "./Signup";
 import NotFound from "./NotFound";
+import Profile from "./Profile";
+import { useDispatch, useSelector } from "react-redux";
+import { receiveUsers } from "../actions";
 
 function App() {
+  const dispatch = useDispatch();
+
+  const handleUsers = () => {
+    fetch("/users")
+      .then((res) => res.json())
+      .then((json) => {
+        dispatch(receiveUsers(json.users));
+      })
+      .catch((error) => console.log(error));
+  };
+
+  React.useEffect(() => {
+    handleUsers();
+  }, []);
+
   return (
     <>
       <GlobalStyles />
@@ -29,13 +47,16 @@ function App() {
             <Scout />
           </Route>
           <Route path="/myaccount">
-            <Account />
+            <MyAccount />
           </Route>
           <Route path="/login">
             <Login />
           </Route>
           <Route path="/signup">
             <Signup />
+          </Route>
+          <Route path="/profile/:username">
+            <Profile />
           </Route>
           <Route path="">
             <NotFound />

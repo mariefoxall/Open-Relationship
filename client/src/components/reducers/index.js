@@ -1,11 +1,15 @@
 import { combineReducers } from "redux";
 
 import application from "./application.reducer";
-import user from "./user.reducer";
+import newuser from "./newuser.reducer";
 import currentuser from "./currentuser.reducer";
+import users from "./users.reducer";
+import profile from "./profile.reducer";
 
 export default combineReducers({
   application,
-  user,
+  newuser,
   currentuser,
+  users,
+  profile,
 });

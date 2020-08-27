@@ -17,8 +17,8 @@ export const newUserInfoConfirmed = (application) => ({
   application,
 });
 
-export const userAlreadyExists = () => ({
-  type: "USER_ALREADY_EXISTS",
+export const usernameAlreadyExists = () => ({
+  type: "USERNAME_ALREADY_EXISTS",
 });
 
 export const succesfullycreatedNewUser = () => ({
@@ -46,7 +46,16 @@ export const userLoggedOut = () => ({
   type: "USER_LOGGED_OUT",
 });
 
-export const loggedInUserDetails = (data) => ({
-  type: "LOGGED_IN_USER_DETAILS",
+// export const loggedInUserDetails = (data) => ({
+//   type: "LOGGED_IN_USER_DETAILS",
+//   data,
+// });
+
+export const receiveUsers = (data) => ({
+  type: "RECEIVE_USERS",
   data,
 });
+
+export const requestProfile = () => ({ type: "REQUEST_PROFILE," });
+
+export const receiveProfile = (data) => ({ type: "RECEIVE_PROFILE", data });
