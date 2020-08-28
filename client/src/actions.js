@@ -56,6 +56,10 @@ export const receiveUsers = (data) => ({
   data,
 });
 
+export const switchingProfile = () => ({
+  type: "SWITCHING_PROFILE",
+});
+
 export const requestProfile = () => ({ type: "REQUEST_PROFILE," });
 
 export const receiveProfile = (data) => ({ type: "RECEIVE_PROFILE", data });

@@ -57,7 +57,8 @@ const MyAccount = () => {
     history.push("/login");
   };
 
-  const [image, setImage] = React.useState("");
+  const [image, setImage] = React.useState({});
+  console.log(image);
 
   const fileOnChange = (ev) => {
     setImage(ev.target.files[0]);
@@ -138,12 +139,18 @@ const MyAccount = () => {
               <div>
                 <ProfilePicture>
                   {profilePicURL && profilePicURL.length > 0 && (
-                    <Pic src={profilePicURL} alt="profile pic" />
+                    <Pic
+                      src={profilePicURL}
+                      alt={`profile pic for ${currentUsername}`}
+                    />
                   )}
-                  <ProfilePicInputDiv>
-                    <ProfilePicInput type="file" onChange={fileOnChange} />
-                  </ProfilePicInputDiv>
-                  <button onClick={sendImage}>upload highlight image</button>
+                  <HoverDiv>
+                    <UpdateDiv>update profile image</UpdateDiv>
+                    <ProfilePicInputDiv>
+                      <ProfilePicInput type="file" onChange={fileOnChange} />
+                      <UploadButton onClick={sendImage}>upload</UploadButton>
+                    </ProfilePicInputDiv>
+                  </HoverDiv>
                 </ProfilePicture>
                 <ConnectDiv>
                   <ReasonsDiv>OPEN TO:</ReasonsDiv>
@@ -191,7 +198,7 @@ const MyAccountDiv = styled.div`
   padding: 20px;
 `;
 
-const Name = styled.h1`
+const Name = styled.h2`
   background-color: var(--pale-yellow);
   padding: 5px;
   border: 1px solid var(--coral);
@@ -209,12 +216,7 @@ const ProfilePicture = styled.div`
   justify-content: center;
   align-items: center;
   background-color: var(--coral);
-`;
-
-const Pic = styled.img`
-  height: 300px;
-  width: 300px;
-  border-radius: 50%;
+  position: relative;
 `;
 
 const ProfilePicInput = styled.input`
@@ -222,14 +224,68 @@ const ProfilePicInput = styled.input`
   flex-direction: column;
   align-items: center; */
   text-align: center;
+  font-family: "Spartan";
+  & > button {
+    background-color: var(--coral);
+  }
+`;
+
+const HoverDiv = styled.div`
+  position: absolute;
+  width: 200px;
+  height: 50px;
+  top: 125px;
+  left: 50px;
+  /* border: 1px solid black; */
+`;
+
+const Pic = styled.img`
+  height: 300px;
+  width: 300px;
+  border-radius: 50%;
+  ${ProfilePicture}:hover & {
+    opacity: 0.5;
+  }
+`;
+
+const UpdateDiv = styled.div`
+  /* height: 40px; */
+  text-align: center;
+  background-color: var(--mint-green);
+  padding: 5px;
+  ${HoverDiv}:hover & {
+    display: none;
+  }
 `;
 
 const ProfilePicInputDiv = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+  display: none;
+  ${HoverDiv}:hover & {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+`;
+
+const UploadButton = styled.button`
+  width: 80px;
+  position: absolute;
+  left: 60px;
+  top: 40px;
+  padding: 10px;
+  background-color: var(--mint-green);
+  outline: none;
+  border: none;
+
+  &: hover {
+    cursor: pointer;
+    background-color: var(--lavender);
+  }
 `;
 
 const NameBio = styled.div`

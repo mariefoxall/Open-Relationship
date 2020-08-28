@@ -11,6 +11,9 @@ export default function profileReducer(state = initialState, action) {
     case "RECEIVE_PROFILE": {
       return { ...state, profile: action.data, status: "profile-received" };
     }
+    case "SWITCHING_PROFILE": {
+      return { initialState };
+    }
     default: {
       return state;
     }

@@ -307,11 +307,9 @@ const getUserProfile = async (req, res) => {
     await client.connect();
     const db = client.db("personal_project");
     const thisUser = await db.collection("users").findOne(query);
+    console.log("thisUser", thisUser);
     if (thisUser) {
-      const thisUserProfile = await db
-        .collection("applications")
-        .findOne({ "contact.email": thisUser.email });
-      return res.status(200).json({ status: 200, data: thisUserProfile });
+      return res.status(200).json({ status: 200, data: thisUser });
     } else {
       return res.status(200).json({ status: 200, userNotFound: true });
     }
@@ -399,10 +397,49 @@ const updateProfilePic = async (req, res) => {
   client.close();
 };
 
-// const checkConnection = async(req.res)=>{
-// const client = await MongoClient(MONGO_URI, options);
-// const userA = req.body.
-// }
+const checkConnection = async (req, res) => {
+  const client = await MongoClient(MONGO_URI, options);
+  const currentUsername = req.body.currentUsername;
+  const profileUsername = req.body.profileUsername;
+  try {
+    await client.connect();
+    const queryA = {
+      requestingUser: currentUsername,
+      receivingUser: profileUsername,
+    };
+    const queryB = {
+      requestingUser: profileUsername,
+      receivingUser: currentUsername,
+    };
+    const db = client.db("personal_project");
+    const youAlreadyAskedThem = await db
+      .collection("connections")
+      .findOne(queryA);
+    const theyAlreadyAskedYou = await db
+      .collection("connections")
+      .findOne(queryB);
+    if (youAlreadyAskedThem) {
+      return res.status(201).json({
+        status: 201,
+        youAlreadyAskedThem: true,
+        message: "you have already requested to connect with this user.",
+      });
+    } else if (theyAlreadyAskedYou) {
+      return res.status(201).json({
+        status: 201,
+        theyAlreadyAskedYou: true,
+        message:
+          "this user has already requested to connect with you! Check your inbox.",
+      });
+    } else {
+      return res.status(201).json({ status: 201, message: "no connection" });
+    }
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ status: 500, message: error.message });
+  }
+  client.close();
+};
 
 module.exports = {
   submitApplication,
@@ -418,4 +455,5 @@ module.exports = {
   getUserProfile,
   makeConnection,
   updateProfilePic,
+  checkConnection,
 };

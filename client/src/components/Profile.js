@@ -6,19 +6,25 @@ import {
   getCurrentUserEmail,
   getCurrentUserInfo,
 } from "./reducers/currentuser.reducer";
-import { loggedInUserDetails } from "../actions";
+import { loggedInUserDetails, switchingProfile } from "../actions";
 import { useParams } from "react-router-dom";
 import { requestProfile, receiveProfile } from "../actions";
 import { getUser } from "./reducers/profile.reducer";
 
 const Profile = () => {
+  const [refreshPage, setRefreshPage] = React.useState(false);
+
   const dispatch = useDispatch();
   const params = useParams();
   const username = params.username;
+  console.log(username);
 
   const [collaboration, setCollaboration] = React.useState(false);
   const [trade, setTrade] = React.useState(false);
   const [connecting, setConnecting] = React.useState(false);
+
+  const [theyAlreadyAskedYou, setTheyAlreadyAskedYou] = React.useState(false);
+  const [youAlreadyAskedThem, setYouAlreadyAskedThem] = React.useState(false);
 
   const currentUserStatus = useSelector((state) => state.currentuser.status);
   const currentUserInfo = useSelector(getCurrentUserInfo);
@@ -42,16 +48,27 @@ const Profile = () => {
   console.log(profile);
 
   const profileStatus = useSelector((state) => state.profile.status);
+  console.log(profileStatus);
+
+  let currentUsername = "";
+
+  if (currentUserInfo) {
+    currentUsername = currentUserInfo.username;
+  }
 
   React.useEffect(() => {
+    dispatch(switchingProfile());
     getUserDetails(username);
-  }, [username]);
+    checkConnection();
+  }, [refreshPage]);
 
   let contact = {};
   let thisPortfolioArray = [];
   let portfolioObject = {};
   let longForm = {};
   let collaborationStyle = { display: "none" };
+
+  let profilePicURL = "../assets/ORlogo.png";
 
   let tradeStyle = { display: "none" };
 
@@ -63,6 +80,7 @@ const Profile = () => {
     portfolioObject = profile.portfolio;
     const portfolioAllArray = Object.entries(portfolioObject);
     console.log(portfolioAllArray);
+    profilePicURL = profile.profilePicURL;
     portfolioAllArray.forEach((option) => {
       if (option[1]) {
         if (option[0] === "graphicDesign") {
@@ -102,6 +120,33 @@ const Profile = () => {
       .then((res) => res.json())
       .then((json) => {
         console.log(json);
+        setRefreshPage(!refreshPage);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const checkConnection = () => {
+    fetch("/check-connection", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        currentUsername: currentUsername,
+        profileUsername: username,
+      }),
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        console.log("json response from check conn", json);
+        if (json.theyAlreadyAskedYou) {
+          setTheyAlreadyAskedYou(true);
+        } else if (json.youAlreadyAskedThem) {
+          setYouAlreadyAskedThem(true);
+        } else {
+          setTheyAlreadyAskedYou(false);
+          setYouAlreadyAskedThem(false);
+        }
       })
       .catch((error) => {
         console.log(error);
@@ -110,6 +155,7 @@ const Profile = () => {
 
   return (
     <>
+      {profileStatus === "loading" && <div>LOADING...</div>}
       {profileStatus === "profile-received" && (
         <>
           {" "}
@@ -117,60 +163,84 @@ const Profile = () => {
           <MyAccount>
             <TopDiv>
               <div>
-                <ProfilePicture></ProfilePicture>
+                <ProfilePicture>
+                  <Pic
+                    src={profilePicURL}
+                    alt={`profile pic for ${username}`}
+                  />
+                </ProfilePicture>
                 <ConnectDiv>
                   <div>CONNECT</div>{" "}
                   <ConnectDropdown>
-                    <SectionHeading>I WANT TO:</SectionHeading>
-                    <CheckboxDiv>
-                      <form>
-                        <Option style={collaborationStyle}>
-                          <input
-                            name="collaboration"
-                            id="collaboration"
-                            type="checkbox"
-                            value={collaboration}
-                            onChange={(ev) => setCollaboration(!collaboration)}
-                          />
-                          <label htmlFor="collaboration">
-                            collaborate on a project
-                          </label>
-                        </Option>
-                        <Option style={tradeStyle}>
-                          <input
-                            name="trade"
-                            id="trade"
-                            type="checkbox"
-                            value={trade}
-                            onChange={(ev) => setTrade(!trade)}
-                          />
-                          <label htmlFor="trade">
-                            trade goods and/or services
-                          </label>
-                        </Option>
-                        <Option style={connectingStyle}>
-                          <input
-                            name="connecting"
-                            id="connecting"
-                            type="checkbox"
-                            value={connecting}
-                            onChange={(ev) => setConnecting(!connecting)}
-                          />
-                          <label htmlFor="connecting">
-                            chat about art, life and the nature of the universe
-                          </label>
-                        </Option>
-                        <ConnectButton
-                          type="submit"
-                          onClick={(ev) => {
-                            ev.preventDefault();
-                            handleConnection();
-                          }}
-                        >
-                          MAKE THIS CONNECTION
-                        </ConnectButton>
-                      </form>
-                    </CheckboxDiv>
+                    {youAlreadyAskedThem && (
+                      <div>
+                        You already reached out to this person! Connection
+                        pending, please be patient :)
+                      </div>
+                    )}
+                    {theyAlreadyAskedYou && (
+                      <div>
+                        This person has already made a request to connect! Check
+                        your messages :)
+                      </div>
+                    )}
+                    {!theyAlreadyAskedYou && !youAlreadyAskedThem && (
+                      <>
+                        <SectionHeading>I WANT TO:</SectionHeading>
+                        <CheckboxDiv>
+                          <form>
+                            <Option style={collaborationStyle}>
+                              <input
+                                name="collaboration"
+                                id="collaboration"
+                                type="checkbox"
+                                value={collaboration}
+                                onChange={(ev) =>
+                                  setCollaboration(!collaboration)
+                                }
+                              />
+                              <label htmlFor="collaboration">
+                                collaborate on a project
+                              </label>
+                            </Option>
+                            <Option style={tradeStyle}>
+                              <input
+                                name="trade"
+                                id="trade"
+                                type="checkbox"
+                                value={trade}
+                                onChange={(ev) => setTrade(!trade)}
+                              />
+                              <label htmlFor="trade">
+                                trade goods and/or services
+                              </label>
+                            </Option>
+                            <Option style={connectingStyle}>
+                              <input
+                                name="connecting"
+                                id="connecting"
+                                type="checkbox"
+                                value={connecting}
+                                onChange={(ev) => setConnecting(!connecting)}
+                              />
+                              <label htmlFor="connecting">
+                                chat about art, life and the nature of the
+                                universe
+                              </label>
+                            </Option>
+                            <ConnectButton
+                              type="submit"
+                              onClick={(ev) => {
+                                ev.preventDefault();
+                                handleConnection();
+                              }}
+                            >
+                              MAKE THIS CONNECTION
+                            </ConnectButton>
+                          </form>
+                        </CheckboxDiv>{" "}
+                      </>
+                    )}
                   </ConnectDropdown>
                 </ConnectDiv>
               </div>
@@ -201,7 +271,13 @@ const MyAccount = styled.div`
   padding: 20px;
 `;
 
-const Name = styled.h1`
+const Pic = styled.img`
+  height: 300px;
+  width: 300px;
+  border-radius: 50%;
+`;
+
+const Name = styled.h2`
   background-color: var(--pale-yellow);
   padding: 5px;
 `;

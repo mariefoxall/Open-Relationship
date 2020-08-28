@@ -12,6 +12,7 @@ const {
   getUserProfile,
   makeConnection,
   updateProfilePic,
+  checkConnection,
 } = require("./handlers");
 
 const router = require("express").Router();
@@ -26,6 +27,8 @@ router.get(
 router.get("/users", getUsers);
 
 router.get("/users/:username", getUserProfile);
+
+router.post("/check-connection", checkConnection);
 
 router.post("/verify-user-for-signin", verifyUserForSignin);
 

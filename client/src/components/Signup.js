@@ -2,13 +2,14 @@ import React from "react";
 import styled from "styled-components";
 import Header from "./Header";
 import { useSelector, useDispatch } from "react-redux";
-import { getNewUserDetails } from "./reducers/user.reducer";
+import { getNewUserDetails } from "./reducers/newuser.reducer";
 import { Link, useHistory } from "react-router-dom";
 import {
   newUserInfoConfirmed,
-  userAlreadyExists,
+  usernameAlreadyExists,
   succesfullycreatedNewUser,
   userLoggedIn,
+  loggingIn,
 } from "../actions";
 
 const Signup = () => {
@@ -16,7 +17,7 @@ const Signup = () => {
   let history = useHistory();
 
   const newUserDetails = useSelector(getNewUserDetails);
-  const userStatus = useSelector((state) => state.user.status);
+  const userStatus = useSelector((state) => state.newuser.status);
   console.log(newUserDetails);
   console.log(userStatus);
 
@@ -48,8 +49,6 @@ const Signup = () => {
   const [otherCategory, setOtherCategory] = React.useState("");
   //long-form answers
   const [bio, setBio] = React.useState("");
-  const [feelings, setFeelings] = React.useState("");
-  const [identity, setIdentity] = React.useState("");
 
   //reasons for joining
   const [collaboration, setCollaboration] = React.useState(false);
@@ -57,10 +56,8 @@ const Signup = () => {
   const [connecting, setConnecting] = React.useState(false);
 
   //login info
+  const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
-
-  //edit variable
-  const [editNumber, setEditNumber] = React.useState(0);
 
   React.useEffect(() => {
     if (userStatus === "signing-up" && newUserDetails) {
@@ -98,26 +95,60 @@ const Signup = () => {
       setOtherCategory(portfolio.otherCategory);
       //long-form answers
       setBio(longForm.bio);
-      setFeelings(longForm.feelings);
-      setIdentity(longForm.identity);
 
       //reasons for joining
       setCollaboration(reasons.collaboration);
       setTrade(reasons.trade);
       setConnecting(reasons.connecting);
-
-      //editNumber
-      if (newUserDetails.editNumber) {
-        setEditNumber(Number(newUserDetails.editNumber) + 1);
-      } else {
-        setEditNumber(1);
-      }
     }
   }, [newUserDetails]);
 
-  const handleConfirmNewUserDetails = () => {
-    fetch("/api/confirm-user-details", {
+  const handleConfirmNewUser = () => {
+    fetch("/confirm-user", {
       method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: email,
+      }),
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        console.log(json);
+        if (json.data) {
+          dispatch(newUserInfoConfirmed(json.data));
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const handleSignIn = () => {
+    dispatch(loggingIn());
+    //check if user exists in "users" collection
+    //dispatch userLoggedIn (email, password)
+    fetch("/verify-user-for-signin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: username,
+        password: password,
+      }),
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        console.log(json);
+        dispatch(userLoggedIn(json.data));
+        history.push("/myaccount");
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const handleCreateNewUser = () => {
+    fetch("/create-new-user", {
+      method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contact: {
@@ -146,30 +177,9 @@ const Signup = () => {
           styling,
           otherCategory,
         },
-        longForm: { bio, feelings, identity },
+        longForm: { bio },
         reasons: { collaboration, trade, connecting },
-        editNumber,
-        signUpCode: "",
-      }),
-    })
-      .then((res) => res.json())
-      .then((json) => {
-        console.log(json);
-        if (json.data) {
-          dispatch(newUserInfoConfirmed(json.data));
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-
-  const handleCreateNewUser = () => {
-    fetch("/api/create-new-user", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: email,
+        username: username,
         password: password,
       }),
     })
@@ -177,12 +187,12 @@ const Signup = () => {
       .then((json) => {
         console.log(json);
         if (json.status === 201) {
-          if (json.userExists) {
-            dispatch(userAlreadyExists());
+          if (json.usernameExists) {
+            dispatch(usernameAlreadyExists());
           } else {
             dispatch(succesfullycreatedNewUser());
-            dispatch(userLoggedIn(json.data));
-            history.push("/account");
+            handleSignIn();
+            history.push("/myaccount");
           }
         }
       })
@@ -190,6 +200,11 @@ const Signup = () => {
         console.log(error);
       });
   };
+
+  const usernameExistsStyle =
+    userStatus === "username-already-exists"
+      ? { display: "flex" }
+      : { display: "none" };
 
   return (
     <>
@@ -445,46 +460,20 @@ const Signup = () => {
                 onChange={(ev) => setOtherCategory(ev.target.value)}
               />
             </fieldset>
-            <fieldset>
-              <legend>DETAILS</legend>
-              <label htmlFor="bio">BIO:</label>
-              <textarea
-                name="bio"
-                id="bio"
-                type="text"
-                value={bio}
-                onChange={(ev) => setBio(ev.target.value)}
-                required
-              />
-              <p>
-                Max. 500 characters - please provide a description of your work
-                and tell us your story!
-              </p>
-              <label htmlFor="feelings">FEELINGS:</label>
-              <textarea
-                name="feelings"
-                id="feelings"
-                type="text"
-                value={feelings}
-                onChange={(ev) => setFeelings(ev.target.value)}
-                required
-              />
-              <p>What does connection with other creatives mean to you?</p>
-              <label htmlFor="identity">IDENTITY:</label>
-              <textarea
-                name="identity"
-                id="identity"
-                type="text"
-                value={identity}
-                onChange={(ev) => setIdentity(ev.target.value)}
-              />
-              <p>
-                We want to ensure diverse and balanced representation in our
-                community of creatives. If you feel comfortable, please let us
-                know if you identify as LGBTQIA2S+, BIPOC or any other personal
-                identity that you'd like to let us know about!
-              </p>
-            </fieldset>
+            <label htmlFor="bio">BIO:</label>
+            <textarea
+              name="bio"
+              id="bio"
+              type="text"
+              value={bio}
+              onChange={(ev) => setBio(ev.target.value)}
+              required
+            />
+            <p>
+              Max. 500 characters - please provide a description of your work
+              and tell us your story! This will be featured on your profile
+              page.
+            </p>
             <fieldset>
               <legend>YOU ARE INTERESTED IN (select all that apply):</legend>
               <input
@@ -524,7 +513,7 @@ const Signup = () => {
               type="submit"
               onClick={(ev) => {
                 ev.preventDefault();
-                handleConfirmNewUserDetails();
+                handleConfirmNewUser();
               }}
             >
               CONFIRM
@@ -541,13 +530,25 @@ const Signup = () => {
       {userStatus === "user-confirmed" && (
         <>
           <div>
-            Thanks for confirming your details! Please set up your password to
-            complete the account setup and sign in. To make any further changes
-            to your account, please sign in and do so in "My account".
+            Thanks for confirming your details! Please set up your username and
+            password to complete the account setup and sign in. To make any
+            further changes to your account, please sign in and do so in "My
+            Account".
           </div>
-          <div>username: {newUserDetails.contact.email}</div>
           <div>
             <form>
+              {" "}
+              <label htmlFor="username">username:</label>
+              <input
+                name="username"
+                id="username"
+                type="text"
+                value={username}
+                onChange={(ev) => setUsername(ev.target.value)}
+              />
+              <div style={usernameExistsStyle}>
+                sorry, someone already snagged that username!
+              </div>
               <label htmlFor="password">password:</label>
               <input
                 name="password"
@@ -569,7 +570,7 @@ const Signup = () => {
           </div>
         </>
       )}
-      {userStatus === "user-already-exists" && (
+      {/* {userStatus === "user-already-exists" && (
         <>
           <div>
             A user account already exists for this email address, please use a
@@ -577,7 +578,7 @@ const Signup = () => {
           </div>
           <Link to="/login">GO BACK</Link>
         </>
-      )}
+      )} */}
     </>
   );
 };

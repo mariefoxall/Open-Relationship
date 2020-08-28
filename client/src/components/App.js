@@ -12,6 +12,7 @@ import NotFound from "./NotFound";
 import Profile from "./Profile";
 import { useDispatch, useSelector } from "react-redux";
 import { receiveUsers } from "../actions";
+import Messages from "./Messages";
 
 function App() {
   const dispatch = useDispatch();
@@ -45,6 +46,9 @@ function App() {
           </Route>
           <Route path="/scout">
             <Scout />
+            {/* </Route>
+          <Route path="/messages">
+            <Messages /> */}
           </Route>
           <Route path="/myaccount">
             <MyAccount />

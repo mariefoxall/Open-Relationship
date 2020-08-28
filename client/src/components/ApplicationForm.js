@@ -43,15 +43,16 @@ const ApplicationForm = () => {
   const [applicationStatus, setApplicationStatus] = React.useState("pending");
   console.log(applicationStatus);
 
+  const [charactersRemaining, setCharactersRemaining] = React.useState(500);
+
   return (
     <>
       <Header />
-      <Spacer />
       {applicationStatus === "pending" && (
-        <form
+        <ApplicationFormPage
           onSubmit={(ev) => {
             ev.preventDefault();
-            fetch("/api/submit-application", {
+            fetch("/submit-application", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
@@ -101,19 +102,23 @@ const ApplicationForm = () => {
               });
           }}
         >
-          <label htmlFor="displayName">
-            DISPLAY NAME (brand name, artist name, etc.):
-          </label>
-          <input
-            name="displayName"
-            id="displayName"
-            type="text"
-            value={displayName}
-            onChange={(ev) => setDisplayName(ev.target.value)}
-            required
-          />
-          <fieldset>
-            <legend>LOCATION:</legend>
+          {" "}
+          <Section>
+            <SectionHeading>DISPLAY NAME:</SectionHeading>
+            <label htmlFor="displayName">(brand, artist name, etc.)</label>
+            <div>
+              <input
+                name="displayName"
+                id="displayName"
+                type="text"
+                value={displayName}
+                onChange={(ev) => setDisplayName(ev.target.value)}
+                required
+              />
+            </div>
+          </Section>
+          <Section>
+            <SectionHeading>LOCATION:</SectionHeading>
             <label htmlFor="country">country</label>
             <input
               name="country"
@@ -132,10 +137,9 @@ const ApplicationForm = () => {
               onChange={(ev) => setPostal(ev.target.value)}
               required
             />
-          </fieldset>
-
-          <fieldset>
-            <legend>PRIMARY CONTACT:</legend>
+          </Section>
+          <Section>
+            <SectionHeading>PRIMARY CONTACT:</SectionHeading>
             <label htmlFor="firstName">first name</label>
             <input
               name="firstName"
@@ -174,10 +178,9 @@ const ApplicationForm = () => {
               onChange={(ev) => setPhone(ev.target.value)}
               required
             />
-          </fieldset>
-
-          <fieldset>
-            <legend>PUBLIC PROFILE:</legend>
+          </Section>
+          <Section>
+            <SectionHeading>PUBLIC PROFILE:</SectionHeading>
             <label htmlFor="website">website</label>
             <input
               name="website"
@@ -196,237 +199,381 @@ const ApplicationForm = () => {
               onChange={(ev) => setInstagram(ev.target.value)}
               required
             />
-          </fieldset>
-          <fieldset>
-            <legend>YOUR PORTFOLIO INCLUDES (select all that apply)</legend>
-            <input
-              name="accessories"
-              id="accessories"
-              type="checkbox"
-              value={accessories}
-              onChange={(ev) => setAccessories(!accessories)}
-            />
-            <label htmlFor="accessories">accessories</label>
-            <br />
-            <input
-              name="animation"
-              id="animation"
-              type="checkbox"
-              value={animation}
-              onChange={(ev) => setAnimation(!animation)}
-            />
-            <label htmlFor="animation">animation</label>
-            <br />
-            <input
-              name="ceramics"
-              id="ceramics"
-              type="checkbox"
-              value={ceramics}
-              onChange={(ev) => setCeramics(!ceramics)}
-            />
-            <label htmlFor="ceramics">ceramics</label>
-            <br />
-            <input
-              name="clothing"
-              id="clothing"
-              type="checkbox"
-              value={clothing}
-              onChange={(ev) => setClothing(!clothing)}
-            />
-            <label htmlFor="clothing">clothing</label>
-            <br />
-            <input
-              name="film"
-              id="film"
-              type="checkbox"
-              value={film}
-              onChange={(ev) => setFilm(!film)}
-            />
-            <label htmlFor="film">film</label>
-            <br />
-            <input
-              name="graphicDesign"
-              id="graphicDesign"
-              type="checkbox"
-              value={graphicDesign}
-              onChange={(ev) => setGraphicDesign(!graphicDesign)}
-            />
-            <label htmlFor="graphicDesign">graphic design</label> <br />
-            <input
-              name="hair"
-              id="hair"
-              type="checkbox"
-              value={hair}
-              onChange={(ev) => setHair(!hair)}
-            />
-            <label htmlFor="hair">hair stylist</label>
-            <br />
-            <input
-              name="homeObjects"
-              id="homeObjects"
-              type="checkbox"
-              value={homeObjects}
-              onChange={(ev) => setHomeObjects(!homeObjects)}
-            />
-            <label htmlFor="homeObjects">home objects</label>
-            <br />
-            <input
-              name="jewelry"
-              id="jewelry"
-              type="checkbox"
-              value={jewelry}
-              onChange={(ev) => setJewelry(!jewelry)}
-            />
-            <label htmlFor="jewelry">jewelry</label>
-            <br />{" "}
-            <input
-              name="makeup"
-              id="makeup"
-              type="checkbox"
-              value={makeup}
-              onChange={(ev) => setMakeup(!makeup)}
-            />
-            <label htmlFor="makeup">makeup artist</label>
-            <br />
-            <input
-              name="music"
-              id="music"
-              type="checkbox"
-              value={music}
-              onChange={(ev) => setMusic(!music)}
-            />
-            <label htmlFor="music">music</label>
-            <br />
-            <input
-              name="painting"
-              id="painting"
-              type="checkbox"
-              value={painting}
-              onChange={(ev) => setPainting(!painting)}
-            />
-            <label htmlFor="painting">painting</label>
-            <br />
-            <input
-              name="photography"
-              id="photography"
-              type="checkbox"
-              value={photography}
-              onChange={(ev) => setPhotography(!photography)}
-            />
-            <label htmlFor="photography">photography</label>
-            <br />
-            <input
-              name="styling"
-              id="styling"
-              type="checkbox"
-              value={styling}
-              onChange={(ev) => setStyling(!styling)}
-            />
-            <label htmlFor="styling">styling</label>
-            <br />
-            <label htmlFor="otherCategory">other:</label>
-            <input
-              name="otherCategory"
-              id="otherCategory"
-              type="text"
-              value={otherCategory}
-              onChange={(ev) => setOtherCategory(ev.target.value)}
-            />
-          </fieldset>
-          <fieldset>
-            <legend>DETAILS</legend>
-            <label htmlFor="bio">BIO:</label>
-            <p>
+          </Section>{" "}
+          <Section>
+            <SectionHeading>
+              YOU ARE INTERESTED IN (select all that apply):
+            </SectionHeading>
+            <CheckboxDiv>
+              <div>
+                <input
+                  name="collaboration"
+                  id="collaboration"
+                  type="checkbox"
+                  value={collaboration}
+                  onChange={(ev) => setCollaboration(!collaboration)}
+                />
+                <label htmlFor="collaboration">collaboration</label>
+              </div>
+              <div>
+                <input
+                  name="trade"
+                  id="trade"
+                  type="checkbox"
+                  value={trade}
+                  onChange={(ev) => setTrade(!trade)}
+                />
+                <label htmlFor="trade">trade</label>
+              </div>
+              <div>
+                <input
+                  name="connecting"
+                  id="connecting"
+                  type="checkbox"
+                  value={connecting}
+                  onChange={(ev) => setConnecting(!connecting)}
+                />
+                <label htmlFor="connecting">
+                  just, like, hanging out and meeting other creatives
+                </label>
+              </div>
+            </CheckboxDiv>
+          </Section>
+          <CheckboxSection>
+            <SectionHeading>
+              YOUR PORTFOLIO INCLUDES<br></br> (select all that apply):
+            </SectionHeading>
+            <CheckboxInner>
+              <CheckboxDiv>
+                <div>
+                  <input
+                    name="accessories"
+                    id="accessories"
+                    type="checkbox"
+                    value={accessories}
+                    onChange={(ev) => setAccessories(!accessories)}
+                  />
+                  <label htmlFor="accessories">accessories</label>
+                </div>
+                <div>
+                  <input
+                    name="animation"
+                    id="animation"
+                    type="checkbox"
+                    value={animation}
+                    onChange={(ev) => setAnimation(!animation)}
+                  />
+                  <label htmlFor="animation">animation</label>
+                </div>
+                <div>
+                  <input
+                    name="ceramics"
+                    id="ceramics"
+                    type="checkbox"
+                    value={ceramics}
+                    onChange={(ev) => setCeramics(!ceramics)}
+                  />
+                  <label htmlFor="ceramics">ceramics</label>
+                </div>
+                <div>
+                  <input
+                    name="clothing"
+                    id="clothing"
+                    type="checkbox"
+                    value={clothing}
+                    onChange={(ev) => setClothing(!clothing)}
+                  />
+                  <label htmlFor="clothing">clothing</label>
+                </div>
+                <div>
+                  <input
+                    name="film"
+                    id="film"
+                    type="checkbox"
+                    value={film}
+                    onChange={(ev) => setFilm(!film)}
+                  />
+                  <label htmlFor="film">film</label>
+                </div>{" "}
+              </CheckboxDiv>
+              <CheckboxDiv>
+                <div>
+                  <input
+                    name="graphicDesign"
+                    id="graphicDesign"
+                    type="checkbox"
+                    value={graphicDesign}
+                    onChange={(ev) => setGraphicDesign(!graphicDesign)}
+                  />
+                  <label htmlFor="graphicDesign">graphic design</label>{" "}
+                </div>
+                <div>
+                  <input
+                    name="hair"
+                    id="hair"
+                    type="checkbox"
+                    value={hair}
+                    onChange={(ev) => setHair(!hair)}
+                  />
+                  <label htmlFor="hair">hair stylist</label>
+                </div>
+                <div>
+                  <input
+                    name="homeObjects"
+                    id="homeObjects"
+                    type="checkbox"
+                    value={homeObjects}
+                    onChange={(ev) => setHomeObjects(!homeObjects)}
+                  />
+                  <label htmlFor="homeObjects">home objects</label>
+                </div>
+                <div>
+                  <input
+                    name="jewelry"
+                    id="jewelry"
+                    type="checkbox"
+                    value={jewelry}
+                    onChange={(ev) => setJewelry(!jewelry)}
+                  />
+                  <label htmlFor="jewelry">jewelry</label>
+                </div>
+                <div>
+                  {" "}
+                  <input
+                    name="makeup"
+                    id="makeup"
+                    type="checkbox"
+                    value={makeup}
+                    onChange={(ev) => setMakeup(!makeup)}
+                  />
+                  <label htmlFor="makeup">makeup artist</label>
+                </div>
+              </CheckboxDiv>
+              <CheckboxDiv>
+                <div>
+                  <input
+                    name="music"
+                    id="music"
+                    type="checkbox"
+                    value={music}
+                    onChange={(ev) => setMusic(!music)}
+                  />
+                  <label htmlFor="music">music</label>
+                </div>
+                <div>
+                  <input
+                    name="painting"
+                    id="painting"
+                    type="checkbox"
+                    value={painting}
+                    onChange={(ev) => setPainting(!painting)}
+                  />
+                  <label htmlFor="painting">painting</label>
+                </div>
+                <div>
+                  <input
+                    name="photography"
+                    id="photography"
+                    type="checkbox"
+                    value={photography}
+                    onChange={(ev) => setPhotography(!photography)}
+                  />
+                  <label htmlFor="photography">photography</label>
+                </div>
+                <div>
+                  <input
+                    name="styling"
+                    id="styling"
+                    type="checkbox"
+                    value={styling}
+                    onChange={(ev) => setStyling(!styling)}
+                  />
+                  <label htmlFor="styling">styling</label>
+                </div>
+                <div>
+                  <label htmlFor="otherCategory">other:</label>
+                  <input
+                    name="otherCategory"
+                    id="otherCategory"
+                    type="text"
+                    value={otherCategory}
+                    onChange={(ev) => setOtherCategory(ev.target.value)}
+                  />
+                </div>
+              </CheckboxDiv>{" "}
+            </CheckboxInner>
+          </CheckboxSection>
+          <Section>
+            <SectionHeading>DETAILS</SectionHeading>
+            <LongFormLabel htmlFor="bio">BIO:</LongFormLabel>
+            <LongFormP>
               Max. 500 characters - please provide a description of your work
               and tell us your story!
-            </p>
-            <textarea
-              name="bio"
-              id="bio"
-              type="text"
-              value={bio}
-              onChange={(ev) => setBio(ev.target.value)}
-              required
-            />
-            <label htmlFor="feelings">FEELINGS:</label>
-            <textarea
-              name="feelings"
-              id="feelings"
-              type="text"
-              value={feelings}
-              onChange={(ev) => setFeelings(ev.target.value)}
-              required
-            />
-            <p>What does connection with other creatives mean to you?</p>
-            <label htmlFor="identity">IDENTITY:</label>
-            <textarea
-              name="identity"
-              id="identity"
-              type="text"
-              value={identity}
-              onChange={(ev) => setIdentity(ev.target.value)}
-            />
-            <p>
+            </LongFormP>
+            <div>
+              <LongFormText
+                name="bio"
+                id="bio"
+                type="text"
+                value={bio}
+                onChange={(ev) => {
+                  setBio(ev.target.value);
+                  setCharactersRemaining(500 - bio.length);
+                }}
+                required
+              />
+              <div>{charactersRemaining}</div>
+            </div>
+            <LongFormLabel htmlFor="feelings">FEELINGS:</LongFormLabel>
+            <LongFormP>
+              What does connection with other creatives mean to you?
+            </LongFormP>
+            <div>
+              <LongFormText
+                name="feelings"
+                id="feelings"
+                type="text"
+                value={feelings}
+                onChange={(ev) => setFeelings(ev.target.value)}
+                required
+              />
+            </div>
+            <LongFormLabel htmlFor="identity">IDENTITY:</LongFormLabel>
+            <LongFormP>
               We want to ensure diverse and balanced representation in our
-              community of creatives. If you feel comfortable, please let us
-              know if you identify as LGBTQIA2S+, BIPOC or any other personal
+              community of creatives. If you feel comfortable, please share
+              whether you identify as LGBTQIA2S+, BIPOC or any other personal
               identity that you'd like to let us know about!
-            </p>
-          </fieldset>
-          <fieldset>
-            <legend>YOU ARE INTERESTED IN (select all that apply):</legend>
-            <input
-              name="collaboration"
-              id="collaboration"
-              type="checkbox"
-              value={collaboration}
-              onChange={(ev) => setCollaboration(!collaboration)}
-            />
-            <label htmlFor="collaboration">collaboration</label>
-            <br />
-            <input
-              name="trade"
-              id="trade"
-              type="checkbox"
-              value={trade}
-              onChange={(ev) => setTrade(!trade)}
-            />
-            <label htmlFor="trade">trade</label>
-            <br />
-            <input
-              name="connecting"
-              id="connecting"
-              type="checkbox"
-              value={connecting}
-              onChange={(ev) => setConnecting(!connecting)}
-            />
-            <label htmlFor="connecting">
-              just, like, hanging out and meeting other creatives
-            </label>
-            <br />
-          </fieldset>
-          <button type="submit">SUBMIT</button>
-        </form>
+            </LongFormP>
+            <div>
+              <LongFormText
+                name="identity"
+                id="identity"
+                type="text"
+                value={identity}
+                onChange={(ev) => setIdentity(ev.target.value)}
+              />
+            </div>
+          </Section>
+          <SubmitButton type="submit">SUBMIT APPLICATION</SubmitButton>
+        </ApplicationFormPage>
       )}
       {applicationStatus === "duplicate" && (
-        <div>
-          Sorry {firstName}, we already have an application for the email
-          address {email}. Please hold tight, we will review it and get back to
-          you soon!
-        </div>
+        <ApplicationFormPage>
+          <SmallDiv>
+            <p>
+              Hi {firstName}, we already have an application for your email
+              address, {email}.
+            </p>
+            <p>
+              Please hold tight, we will review it and get back to you soon!
+            </p>
+          </SmallDiv>{" "}
+        </ApplicationFormPage>
       )}
       {applicationStatus === "success" && (
-        <div>
-          Thanks {firstName}! We have received your application. Our team will
-          review it and get back to you soon :)
-        </div>
+        <ApplicationFormPage>
+          <SmallDiv>
+            Thanks {firstName}! We have received your application. Our team will
+            review it and get back to you soon :)
+          </SmallDiv>
+        </ApplicationFormPage>
       )}
     </>
   );
 };
 
-const Spacer = styled.div`
-  height: 100px;
+const ApplicationFormPage = styled.form`
+  background-color: var(--mint-green);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+`;
+
+const SmallDiv = styled.div`
+  background-color: var(--pale-yellow);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin-top: 10px;
+  max-width: 500px;
+`;
+
+const Section = styled.fieldset`
+  background-color: var(--pale-yellow);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin-top: 10px;
+  max-width: 500px;
+`;
+
+const CheckboxSection = styled.fieldset`
+  background-color: var(--pale-yellow);
+  padding: 10px;
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+`;
+
+const SectionHeading = styled.legend`
+  background-color: var(--lavender);
+  padding: 5px;
+`;
+
+const CheckboxDiv = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-right: 20px;
+  &: last-child {
+    margin-right: 0;
+  }
+`;
+
+const CheckboxInner = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+`;
+
+const LongFormText = styled.textarea`
+  height: 200px;
+  width: 300px;
+`;
+
+const LongFormLabel = styled.label`
+  padding: 5px;
+  background-color: var(--coral);
+  margin-top: 10px;
+`;
+
+const LongFormP = styled.p`
+  padding: 5px;
+  border: 1px solid var(--coral);
+  margin-bottom: 10px;
+`;
+
+const SubmitButton = styled.button`
+  padding: 10px;
+  background-color: var(--coral);
+  outline: none;
+  border: none;
+  margin-top: 20px;
+  font-size: 18px;
+
+  &: hover {
+    cursor: pointer;
+    background-color: var(--lavender);
+  }
 `;
 
 export default ApplicationForm;

@@ -15,7 +15,7 @@ const ApplicationReview = () => {
   const [toggleRefresh, setToggleRefresh] = React.useState(false);
 
   const handleOutstandingApplications = () => {
-    fetch("/api/view-outstanding-applications")
+    fetch("/view-outstanding-applications")
       .then((res) => res.json())
       .then((json) => {
         console.log(json);
@@ -55,7 +55,7 @@ const ApplicationReview = () => {
     numPages > 1 ? { visibility: "visible" } : { visibility: "hidden" };
 
   const handleApprove = (currentApplication) => {
-    fetch("/api/approve-application", {
+    fetch("/approve-application", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -74,7 +74,7 @@ const ApplicationReview = () => {
   };
 
   const handleDeny = (currentApplication) => {
-    fetch("/api/deny-application", {
+    fetch("/deny-application", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
