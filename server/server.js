@@ -1,33 +1,33 @@
 "use strict";
 
 const express = require("express");
-// const http = require("http");
-// const path = require("path");
-// const socketIO = require("socket.io");
+const http = require("http");
+const path = require("path");
+const socket = require("socket.io");
+const app = express();
+const server = http.Server(app);
+const io = socket(server);
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
-const helmet = require("helmet");
-const multer = require("multer");
-const upload = multer({ dest: "./uploads/" });
-const fs = require("fs");
+
+// const helmet = require("helmet");
+// const fs = require("fs");
 
 const PORT = process.env.PORT || 8000;
 
-var app = express();
-// const server = http.createServer(app);
-// const io = socketIO(server);
+// const io = socketIO(http);
 
 app.use(express.json());
 app.use(morgan("dev"));
-app.use(helmet());
+// app.use(helmet());
 app.use(require("./routes"));
 
-// io.onconnection("connection", (socket) => {
-//   socket.emit("connection-message", { status: "connected" });
-//   socket.on("send chat message", (msg) => {
-//put msg in database
-//   });
-// });
+io.on("connection", (socket) => {
+  socket.emit("connection-message", "hi you are connected");
+  socket.on("send chat message", (msg) => {
+    console.log(msg);
+  });
+});
 
 //     console.log("msgDetails", groupId, sender, msg, time);
 //     io.emit("receiver-chat-message", { groupId, sender, msg, time });
@@ -43,6 +43,10 @@ app.get("/bacon", (req, res) =>
   res.status(200).json("I'm sorry, I never want to hear the word '🥓' again.")
 );
 
-const server = app.listen(PORT, function () {
+server.listen(PORT, function () {
   console.info("🌍 Listening on port " + server.address().port);
 });
+
+// http.listen(port,() =>{
+//   console.log("server is listening on localhost:"+port);
+// })

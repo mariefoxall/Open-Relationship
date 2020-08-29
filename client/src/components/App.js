@@ -46,9 +46,9 @@ function App() {
           </Route>
           <Route path="/scout">
             <Scout />
-            {/* </Route>
+          </Route>
           <Route path="/messages">
-            <Messages /> */}
+            <Messages />
           </Route>
           <Route path="/myaccount">
             <MyAccount />

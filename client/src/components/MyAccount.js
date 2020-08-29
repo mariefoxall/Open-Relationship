@@ -2,10 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import Header from "./Header";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  getCurrentUserEmail,
-  getCurrentUserInfo,
-} from "./reducers/currentuser.reducer";
+import { getCurrentUserInfo } from "./reducers/currentuser.reducer";
 import { userLoggedIn, userLoggedOut } from "../actions";
 import { useHistory } from "react-router-dom";
 
@@ -18,6 +15,8 @@ const MyAccount = () => {
   const currentUserInfo = useSelector(getCurrentUserInfo);
   let currentUsername = currentUserInfo ? currentUserInfo.username : null;
   console.log("currentUsername", currentUsername);
+
+  // const [refreshPage, setRefreshPage] = React.useState('false');
 
   let contact = {};
   let thisPortfolioArray = [];
@@ -140,7 +139,11 @@ const MyAccount = () => {
                 <ProfilePicture>
                   {profilePicURL && profilePicURL.length > 0 && (
                     <Pic
-                      src={profilePicURL}
+                      src={
+                        newProfilePicURL.length > 0
+                          ? newProfilePicURL
+                          : profilePicURL
+                      }
                       alt={`profile pic for ${currentUsername}`}
                     />
                   )}
@@ -148,7 +151,14 @@ const MyAccount = () => {
                     <UpdateDiv>update profile image</UpdateDiv>
                     <ProfilePicInputDiv>
                       <ProfilePicInput type="file" onChange={fileOnChange} />
-                      <UploadButton onClick={sendImage}>upload</UploadButton>
+                      <UploadButton
+                        onClick={() => {
+                          sendImage();
+                          setImage({});
+                        }}
+                      >
+                        upload
+                      </UploadButton>
                     </ProfilePicInputDiv>
                   </HoverDiv>
                 </ProfilePicture>

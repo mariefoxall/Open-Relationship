@@ -22,13 +22,13 @@ const ApplicationForm = () => {
   const [graphicDesign, setGraphicDesign] = React.useState(false);
   const [hair, setHair] = React.useState(false);
   const [homeObjects, setHomeObjects] = React.useState(false);
+  const [illustration, setIllustration] = React.useState("");
   const [jewelry, setJewelry] = React.useState(false);
   const [makeup, setMakeup] = React.useState(false);
   const [music, setMusic] = React.useState(false);
   const [painting, setPainting] = React.useState(false);
   const [photography, setPhotography] = React.useState(false);
   const [styling, setStyling] = React.useState(false);
-  const [otherCategory, setOtherCategory] = React.useState("");
   //long-form answers
   const [bio, setBio] = React.useState("");
   const [feelings, setFeelings] = React.useState("");
@@ -74,13 +74,13 @@ const ApplicationForm = () => {
                   graphicDesign,
                   hair,
                   homeObjects,
+                  illustration,
                   jewelry,
                   makeup,
                   music,
                   painting,
                   photography,
                   styling,
-                  otherCategory,
                 },
                 longForm: { bio, feelings, identity },
                 reasons: { collaboration, trade, connecting },
@@ -329,6 +329,16 @@ const ApplicationForm = () => {
                 </div>
                 <div>
                   <input
+                    name="illustration"
+                    id="illustration"
+                    type="checkbox"
+                    value={illustration}
+                    onChange={(ev) => setIllustration(!illustration)}
+                  />
+                  <label htmlFor="illustration">illustration</label>
+                </div>
+                <div>
+                  <input
                     name="jewelry"
                     id="jewelry"
                     type="checkbox"
@@ -336,7 +346,9 @@ const ApplicationForm = () => {
                     onChange={(ev) => setJewelry(!jewelry)}
                   />
                   <label htmlFor="jewelry">jewelry</label>
-                </div>
+                </div>{" "}
+              </CheckboxDiv>
+              <CheckboxDiv>
                 <div>
                   {" "}
                   <input
@@ -348,8 +360,6 @@ const ApplicationForm = () => {
                   />
                   <label htmlFor="makeup">makeup artist</label>
                 </div>
-              </CheckboxDiv>
-              <CheckboxDiv>
                 <div>
                   <input
                     name="music"
@@ -389,16 +399,6 @@ const ApplicationForm = () => {
                     onChange={(ev) => setStyling(!styling)}
                   />
                   <label htmlFor="styling">styling</label>
-                </div>
-                <div>
-                  <label htmlFor="otherCategory">other:</label>
-                  <input
-                    name="otherCategory"
-                    id="otherCategory"
-                    type="text"
-                    value={otherCategory}
-                    onChange={(ev) => setOtherCategory(ev.target.value)}
-                  />
                 </div>
               </CheckboxDiv>{" "}
             </CheckboxInner>

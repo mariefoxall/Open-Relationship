@@ -90,6 +90,7 @@ const SearchBar = () => {
               <Suggestion
                 key={user.username + index}
                 onClick={() => {
+                  console.log("onclick");
                   seeProfile(user.username);
                   setSearchInput("");
                   setFilteredSuggestions([]);

@@ -13,6 +13,9 @@ const {
   makeConnection,
   updateProfilePic,
   checkConnection,
+  sendMessage,
+  getSentMessages,
+  getReceivedMessages,
 } = require("./handlers");
 
 const router = require("express").Router();
@@ -39,6 +42,11 @@ router.post("/create-new-user", createNewUser);
 // router.post("/get-user-details", getUserDetails);
 
 router.post("/make-connection", makeConnection);
+
+router.post("/get-sent-messages", getSentMessages);
+router.post("/get-received-messages", getReceivedMessages);
+
+router.post("/send-message", sendMessage);
 
 router.put("/approve-application", approveApplication);
 

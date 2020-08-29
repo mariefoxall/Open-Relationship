@@ -10,6 +10,7 @@ import { loggedInUserDetails, switchingProfile } from "../actions";
 import { useParams } from "react-router-dom";
 import { requestProfile, receiveProfile } from "../actions";
 import { getUser } from "./reducers/profile.reducer";
+import moment from "moment";
 
 const Profile = () => {
   const [refreshPage, setRefreshPage] = React.useState(false);
@@ -29,6 +30,31 @@ const Profile = () => {
   const currentUserStatus = useSelector((state) => state.currentuser.status);
   const currentUserInfo = useSelector(getCurrentUserInfo);
   console.log(currentUserInfo);
+
+  let interestMessage = "";
+
+  const collaborationMessage = "collaborating on a project together";
+  const tradeMessage = "trading some of our work";
+  const connectingMessage = "chatting about art, life and the universe";
+
+  if (collaboration && trade && connecting) {
+    interestMessage = `${collaborationMessage}, ${tradeMessage} and ${connectingMessage}.`;
+  } else if (collaboration && trade) {
+    interestMessage = `${collaborationMessage} and ${tradeMessage}.`;
+  } else if (collaboration && connecting) {
+    interestMessage = `${collaborationMessage} and ${connectingMessage}.`;
+  } else if (trade && connecting) {
+    interestMessage = `${tradeMessage} and ${connectingMessage}.`;
+  } else if (collaboration) {
+    interestMessage = `${collaborationMessage}.`;
+  } else if (trade) {
+    interestMessage = `${tradeMessage}.`;
+  } else if (connecting) {
+    interestMessage = `${connectingMessage}.`;
+  }
+
+  const currentTime = moment();
+  console.log(currentTime);
 
   //   const currentUserEmail = useSelector(getCurrentUserEmail);
   //   console.log(currentUserEmail);
@@ -60,18 +86,24 @@ const Profile = () => {
     dispatch(switchingProfile());
     getUserDetails(username);
     checkConnection();
+  }, [username]);
+
+  React.useEffect(() => {
+    dispatch(switchingProfile());
+    getUserDetails(username);
+    checkConnection();
   }, [refreshPage]);
 
   let contact = {};
   let thisPortfolioArray = [];
   let portfolioObject = {};
   let longForm = {};
+  let reasonsObject = {};
+  let thisReasonsArray = [];
+  let profilePicURL = "";
+
   let collaborationStyle = { display: "none" };
-
-  let profilePicURL = "../assets/ORlogo.png";
-
   let tradeStyle = { display: "none" };
-
   let connectingStyle = { display: "none" };
 
   if (profile) {
@@ -94,6 +126,15 @@ const Profile = () => {
         }
       }
     });
+
+    reasonsObject = profile.reasons;
+    const reasonsAllArray = Object.entries(reasonsObject);
+    reasonsAllArray.forEach((reason) => {
+      if (reason[1]) {
+        thisReasonsArray.push(reason[0]);
+      }
+    });
+
     collaborationStyle = profile.reasons.collaboration
       ? { display: "block" }
       : { display: "none" };
@@ -115,6 +156,7 @@ const Profile = () => {
         requestingUser: currentUserInfo.username,
         receivingUser: username,
         reasons: { connecting, trade, collaboration },
+        connectionApproved: false,
       }),
     })
       .then((res) => res.json())
@@ -153,9 +195,41 @@ const Profile = () => {
       });
   };
 
+  const sendConnectionMessage = () => {
+    fetch("/send-message", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sender: currentUsername,
+        receiver: username,
+        message: `Hi! I'd love to connect with you. I'm interested in ${interestMessage}`,
+        timestamp: currentTime,
+      }),
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        console.log(json);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
   return (
     <>
-      {profileStatus === "loading" && <div>LOADING...</div>}
+      {profileStatus === "loading" && (
+        <>
+          <Header />
+          <div>LOADING...</div>
+        </>
+      )}
+      {profileStatus === "profile-requested" && (
+        <>
+          <Header />
+          <div>Loading profile...</div>
+        </>
+      )}
+
       {profileStatus === "profile-received" && (
         <>
           {" "}
@@ -172,6 +246,19 @@ const Profile = () => {
                 <ConnectDiv>
                   <div>CONNECT</div>{" "}
                   <ConnectDropdown>
+                    {currentUserStatus === "idle" && (
+                      <>
+                        <SectionHeading>{username} is into:</SectionHeading>
+                        <CheckboxDiv>
+                          <div>
+                            {thisReasonsArray.map((option) => {
+                              return <Category key={option}>{option}</Category>;
+                            })}
+                          </div>
+                        </CheckboxDiv>
+                      </>
+                    )}
+
                     {youAlreadyAskedThem && (
                       <div>
                         You already reached out to this person! Connection
@@ -184,63 +271,66 @@ const Profile = () => {
                         your messages :)
                       </div>
                     )}
-                    {!theyAlreadyAskedYou && !youAlreadyAskedThem && (
-                      <>
-                        <SectionHeading>I WANT TO:</SectionHeading>
-                        <CheckboxDiv>
-                          <form>
-                            <Option style={collaborationStyle}>
-                              <input
-                                name="collaboration"
-                                id="collaboration"
-                                type="checkbox"
-                                value={collaboration}
-                                onChange={(ev) =>
-                                  setCollaboration(!collaboration)
-                                }
-                              />
-                              <label htmlFor="collaboration">
-                                collaborate on a project
-                              </label>
-                            </Option>
-                            <Option style={tradeStyle}>
-                              <input
-                                name="trade"
-                                id="trade"
-                                type="checkbox"
-                                value={trade}
-                                onChange={(ev) => setTrade(!trade)}
-                              />
-                              <label htmlFor="trade">
-                                trade goods and/or services
-                              </label>
-                            </Option>
-                            <Option style={connectingStyle}>
-                              <input
-                                name="connecting"
-                                id="connecting"
-                                type="checkbox"
-                                value={connecting}
-                                onChange={(ev) => setConnecting(!connecting)}
-                              />
-                              <label htmlFor="connecting">
-                                chat about art, life and the nature of the
-                                universe
-                              </label>
-                            </Option>
-                            <ConnectButton
-                              type="submit"
-                              onClick={(ev) => {
-                                ev.preventDefault();
-                                handleConnection();
-                              }}
-                            >
-                              MAKE THIS CONNECTION
-                            </ConnectButton>
-                          </form>
-                        </CheckboxDiv>{" "}
-                      </>
-                    )}
+                    {currentUserStatus === "logged-in" &&
+                      !theyAlreadyAskedYou &&
+                      !youAlreadyAskedThem && (
+                        <>
+                          <SectionHeading>I WANT TO:</SectionHeading>
+                          <CheckboxDiv>
+                            <form>
+                              <Option style={collaborationStyle}>
+                                <input
+                                  name="collaboration"
+                                  id="collaboration"
+                                  type="checkbox"
+                                  value={collaboration}
+                                  onChange={(ev) =>
+                                    setCollaboration(!collaboration)
+                                  }
+                                />
+                                <label htmlFor="collaboration">
+                                  collaborate on a project
+                                </label>
+                              </Option>
+                              <Option style={tradeStyle}>
+                                <input
+                                  name="trade"
+                                  id="trade"
+                                  type="checkbox"
+                                  value={trade}
+                                  onChange={(ev) => setTrade(!trade)}
+                                />
+                                <label htmlFor="trade">
+                                  trade goods and/or services
+                                </label>
+                              </Option>
+                              <Option style={connectingStyle}>
+                                <input
+                                  name="connecting"
+                                  id="connecting"
+                                  type="checkbox"
+                                  value={connecting}
+                                  onChange={(ev) => setConnecting(!connecting)}
+                                />
+                                <label htmlFor="connecting">
+                                  chat about art, life and the nature of the
+                                  universe
+                                </label>
+                              </Option>
+                              <ConnectButton
+                                type="submit"
+                                onClick={(ev) => {
+                                  ev.preventDefault();
+                                  handleConnection();
+                                  sendConnectionMessage();
+                                }}
+                              >
+                                MAKE THIS CONNECTION
+                              </ConnectButton>
+                            </form>
+                          </CheckboxDiv>{" "}
+                        </>
+                      )}
                   </ConnectDropdown>
                 </ConnectDiv>
               </div>

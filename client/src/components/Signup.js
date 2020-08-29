@@ -40,13 +40,14 @@ const Signup = () => {
   const [graphicDesign, setGraphicDesign] = React.useState(false);
   const [hair, setHair] = React.useState(false);
   const [homeObjects, setHomeObjects] = React.useState(false);
+  const [illustration, setIllustration] = React.useState(false);
+
   const [jewelry, setJewelry] = React.useState(false);
   const [makeup, setMakeup] = React.useState(false);
   const [music, setMusic] = React.useState(false);
   const [painting, setPainting] = React.useState(false);
   const [photography, setPhotography] = React.useState(false);
   const [styling, setStyling] = React.useState(false);
-  const [otherCategory, setOtherCategory] = React.useState("");
   //long-form answers
   const [bio, setBio] = React.useState("");
 
@@ -58,6 +59,8 @@ const Signup = () => {
   //login info
   const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
+
+  const [charactersRemaining, setCharactersRemaining] = React.useState(500);
 
   React.useEffect(() => {
     if (userStatus === "signing-up" && newUserDetails) {
@@ -86,13 +89,13 @@ const Signup = () => {
       setGraphicDesign(portfolio.graphicDesign);
       setHair(portfolio.hair);
       setHomeObjects(portfolio.homeObjects);
+      setIllustration(portfolio.illustration);
       setJewelry(portfolio.jewelry);
       setMakeup(portfolio.makeup);
       setMusic(portfolio.music);
       setPainting(portfolio.painting);
       setPhotography(portfolio.photography);
       setStyling(portfolio.styling);
-      setOtherCategory(portfolio.otherCategory);
       //long-form answers
       setBio(longForm.bio);
 
@@ -169,18 +172,20 @@ const Signup = () => {
           graphicDesign,
           hair,
           homeObjects,
+          illustration,
           jewelry,
           makeup,
           music,
           painting,
           photography,
           styling,
-          otherCategory,
         },
         longForm: { bio },
         reasons: { collaboration, trade, connecting },
         username: username,
         password: password,
+        profilePicURL:
+          "http://res.cloudinary.com/open-relationship/image/upload/v1598655457/jwgpnljgfnhdntioscrj.png",
       }),
     })
       .then((res) => res.json())
@@ -211,22 +216,27 @@ const Signup = () => {
       <Header />
       {userStatus === "signing-up" && newUserDetails && (
         <>
-          <div>
-            Welcome! Let's finish setting up your profile,{" "}
-            {newUserDetails.contact.fullName.firstName}.
-          </div>
-          <form>
-            <label htmlFor="displayName">DISPLAY NAME:</label>
-            <input
-              name="displayName"
-              id="displayName"
-              type="text"
-              value={displayName}
-              onChange={(ev) => setDisplayName(ev.target.value)}
-              required
-            />
-            <fieldset>
-              <legend>LOCATION:</legend>
+          <ApplicationFormPage>
+            <WelcomeDiv>
+              Welcome! Let's finish setting up your profile,{" "}
+              {newUserDetails.contact.fullName.firstName}.
+            </WelcomeDiv>
+            <Section>
+              <SectionHeading>DISPLAY NAME:</SectionHeading>
+              <label htmlFor="displayName">(brand, artist name, etc.)</label>
+              <div>
+                <input
+                  name="displayName"
+                  id="displayName"
+                  type="text"
+                  value={displayName}
+                  onChange={(ev) => setDisplayName(ev.target.value)}
+                  required
+                />
+              </div>
+            </Section>
+            <Section>
+              <SectionHeading>LOCATION:</SectionHeading>
               <label htmlFor="country">country</label>
               <input
                 name="country"
@@ -245,10 +255,9 @@ const Signup = () => {
                 onChange={(ev) => setPostal(ev.target.value)}
                 required
               />
-            </fieldset>
-
-            <fieldset>
-              <legend>PRIMARY CONTACT:</legend>
+            </Section>
+            <Section>
+              <SectionHeading>PRIMARY CONTACT:</SectionHeading>
               <label htmlFor="firstName">first name</label>
               <input
                 name="firstName"
@@ -287,10 +296,9 @@ const Signup = () => {
                 onChange={(ev) => setPhone(ev.target.value)}
                 required
               />
-            </fieldset>
-
-            <fieldset>
-              <legend>PUBLIC PROFILE:</legend>
+            </Section>
+            <Section>
+              <SectionHeading>PUBLIC PROFILE:</SectionHeading>
               <label htmlFor="website">website</label>
               <input
                 name="website"
@@ -309,216 +317,259 @@ const Signup = () => {
                 onChange={(ev) => setInstagram(ev.target.value)}
                 required
               />
-            </fieldset>
-            <fieldset>
-              <legend>YOUR PORTFOLIO INCLUDES (select all that apply)</legend>
-              <input
-                name="accessories"
-                id="accessories"
-                type="checkbox"
-                checked={accessories}
-                value={accessories}
-                onChange={(ev) => setAccessories(!accessories)}
-              />
-              <label htmlFor="accessories">accessories</label>
-              <br />
-              <input
-                name="animation"
-                id="animation"
-                type="checkbox"
-                checked={animation}
-                value={animation}
-                onChange={(ev) => setAnimation(!animation)}
-              />
-              <label htmlFor="animation">animation</label>
-              <br />
-              <input
-                name="ceramics"
-                id="ceramics"
-                type="checkbox"
-                checked={ceramics}
-                value={ceramics}
-                onChange={(ev) => setCeramics(!ceramics)}
-              />
-              <label htmlFor="ceramics">ceramics</label>
-              <br />
-              <input
-                name="clothing"
-                id="clothing"
-                type="checkbox"
-                checked={clothing}
-                value={clothing}
-                onChange={(ev) => setClothing(!clothing)}
-              />
-              <label htmlFor="clothing">clothing</label>
-              <br />
-              <input
-                name="film"
-                id="film"
-                type="checkbox"
-                checked={film}
-                value={film}
-                onChange={(ev) => setFilm(!film)}
-              />
-              <label htmlFor="film">film</label>
-              <br />
-              <input
-                name="graphicDesign"
-                id="graphicDesign"
-                type="checkbox"
-                checked={graphicDesign}
-                value={graphicDesign}
-                onChange={(ev) => setGraphicDesign(!graphicDesign)}
-              />
-              <label htmlFor="graphicDesign">graphic design</label> <br />
-              <input
-                name="hair"
-                id="hair"
-                type="checkbox"
-                checked={hair}
-                value={hair}
-                onChange={(ev) => setHair(!hair)}
-              />
-              <label htmlFor="hair">hair stylist</label>
-              <br />
-              <input
-                name="homeObjects"
-                id="homeObjects"
-                type="checkbox"
-                checked={homeObjects}
-                value={homeObjects}
-                onChange={(ev) => setHomeObjects(!homeObjects)}
-              />
-              <label htmlFor="homeObjects">home objects</label>
-              <br />
-              <input
-                name="jewelry"
-                id="jewelry"
-                type="checkbox"
-                checked={jewelry}
-                value={jewelry}
-                onChange={(ev) => setJewelry(!jewelry)}
-              />
-              <label htmlFor="jewelry">jewelry</label>
-              <br />{" "}
-              <input
-                name="makeup"
-                id="makeup"
-                type="checkbox"
-                checked={makeup}
-                value={makeup}
-                onChange={(ev) => setMakeup(!makeup)}
-              />
-              <label htmlFor="makeup">makeup artist</label>
-              <br />
-              <input
-                name="music"
-                id="music"
-                type="checkbox"
-                checked={music}
-                value={music}
-                onChange={(ev) => setMusic(!music)}
-              />
-              <label htmlFor="music">music</label>
-              <br />
-              <input
-                name="painting"
-                id="painting"
-                type="checkbox"
-                checked={painting}
-                value={painting}
-                onChange={(ev) => setPainting(!painting)}
-              />
-              <label htmlFor="painting">painting</label>
-              <br />
-              <input
-                name="photography"
-                id="photography"
-                type="checkbox"
-                checked={photography}
-                value={photography}
-                onChange={(ev) => setPhotography(!photography)}
-              />
-              <label htmlFor="photography">photography</label>
-              <br />
-              <input
-                name="styling"
-                id="styling"
-                type="checkbox"
-                checked={styling}
-                value={styling}
-                onChange={(ev) => setStyling(!styling)}
-              />
-              <label htmlFor="styling">styling</label>
-              <br />
-              <label htmlFor="otherCategory">other:</label>
-              <input
-                name="otherCategory"
-                id="otherCategory"
-                type="text"
-                value={otherCategory}
-                onChange={(ev) => setOtherCategory(ev.target.value)}
-              />
-            </fieldset>
-            <label htmlFor="bio">BIO:</label>
-            <textarea
-              name="bio"
-              id="bio"
-              type="text"
-              value={bio}
-              onChange={(ev) => setBio(ev.target.value)}
-              required
-            />
-            <p>
-              Max. 500 characters - please provide a description of your work
-              and tell us your story! This will be featured on your profile
-              page.
-            </p>
-            <fieldset>
-              <legend>YOU ARE INTERESTED IN (select all that apply):</legend>
-              <input
-                name="collaboration"
-                id="collaboration"
-                type="checkbox"
-                checked={collaboration}
-                value={collaboration}
-                onChange={(ev) => setCollaboration(!collaboration)}
-              />
-              <label htmlFor="collaboration">collaboration</label>
-              <br />
-              <input
-                name="trade"
-                id="trade"
-                type="checkbox"
-                checked={trade}
-                value={trade}
-                onChange={(ev) => setTrade(!trade)}
-              />
-              <label htmlFor="trade">trade</label>
-              <br />
-              <input
-                name="connecting"
-                id="connecting"
-                type="checkbox"
-                checked={connecting}
-                value={connecting}
-                onChange={(ev) => setConnecting(!connecting)}
-              />
-              <label htmlFor="connecting">
-                just, like, hanging out and meeting other creatives
-              </label>
-              <br />
-            </fieldset>
-            <button
+            </Section>{" "}
+            <Section>
+              <SectionHeading>
+                YOU ARE INTERESTED IN (select all that apply):
+              </SectionHeading>
+              <CheckboxDiv>
+                <div>
+                  <input
+                    name="collaboration"
+                    id="collaboration"
+                    type="checkbox"
+                    checked={collaboration}
+                    value={collaboration}
+                    onChange={(ev) => setCollaboration(!collaboration)}
+                  />
+                  <label htmlFor="collaboration">collaboration</label>
+                </div>
+                <div>
+                  <input
+                    name="trade"
+                    id="trade"
+                    type="checkbox"
+                    checked={trade}
+                    value={trade}
+                    onChange={(ev) => setTrade(!trade)}
+                  />
+                  <label htmlFor="trade">trade</label>
+                </div>
+                <div>
+                  <input
+                    name="connecting"
+                    id="connecting"
+                    type="checkbox"
+                    checked={connecting}
+                    value={connecting}
+                    onChange={(ev) => setConnecting(!connecting)}
+                  />
+                  <label htmlFor="connecting">
+                    just, like, hanging out and meeting other creatives
+                  </label>
+                </div>
+              </CheckboxDiv>
+            </Section>
+            <CheckboxSection>
+              <SectionHeading>
+                YOUR PORTFOLIO INCLUDES<br></br> (select all that apply):
+              </SectionHeading>
+              <CheckboxInner>
+                <CheckboxDiv>
+                  <div>
+                    <input
+                      name="accessories"
+                      id="accessories"
+                      type="checkbox"
+                      checked={accessories}
+                      value={accessories}
+                      onChange={(ev) => setAccessories(!accessories)}
+                    />
+                    <label htmlFor="accessories">accessories</label>
+                  </div>
+                  <div>
+                    <input
+                      name="animation"
+                      id="animation"
+                      type="checkbox"
+                      checked={animation}
+                      value={animation}
+                      onChange={(ev) => setAnimation(!animation)}
+                    />
+                    <label htmlFor="animation">animation</label>
+                  </div>
+                  <div>
+                    <input
+                      name="ceramics"
+                      id="ceramics"
+                      type="checkbox"
+                      checked={ceramics}
+                      value={ceramics}
+                      onChange={(ev) => setCeramics(!ceramics)}
+                    />
+                    <label htmlFor="ceramics">ceramics</label>
+                  </div>
+                  <div>
+                    <input
+                      name="clothing"
+                      id="clothing"
+                      type="checkbox"
+                      checked={clothing}
+                      value={clothing}
+                      onChange={(ev) => setClothing(!clothing)}
+                    />
+                    <label htmlFor="clothing">clothing</label>
+                  </div>
+                  <div>
+                    <input
+                      name="film"
+                      id="film"
+                      type="checkbox"
+                      checked={film}
+                      value={film}
+                      onChange={(ev) => setFilm(!film)}
+                    />
+                    <label htmlFor="film">film</label>
+                  </div>{" "}
+                </CheckboxDiv>
+                <CheckboxDiv>
+                  <div>
+                    <input
+                      name="graphicDesign"
+                      id="graphicDesign"
+                      type="checkbox"
+                      checked={graphicDesign}
+                      value={graphicDesign}
+                      onChange={(ev) => setGraphicDesign(!graphicDesign)}
+                    />
+                    <label htmlFor="graphicDesign">graphic design</label>{" "}
+                  </div>
+                  <div>
+                    <input
+                      name="hair"
+                      id="hair"
+                      type="checkbox"
+                      checked={hair}
+                      value={hair}
+                      onChange={(ev) => setHair(!hair)}
+                    />
+                    <label htmlFor="hair">hair stylist</label>
+                  </div>
+                  <div>
+                    <input
+                      name="homeObjects"
+                      id="homeObjects"
+                      type="checkbox"
+                      checked={homeObjects}
+                      value={homeObjects}
+                      onChange={(ev) => setHomeObjects(!homeObjects)}
+                    />
+                    <label htmlFor="homeObjects">home objects</label>
+                  </div>
+                  <div>
+                    <input
+                      name="illustration"
+                      id="illustration"
+                      type="checkbox"
+                      checked={illustration}
+                      value={illustration}
+                      onChange={(ev) => setIllustration(!illustration)}
+                    />
+                    <label htmlFor="illustration">illustration</label>
+                  </div>
+                  <div>
+                    <input
+                      name="jewelry"
+                      id="jewelry"
+                      type="checkbox"
+                      checked={jewelry}
+                      value={jewelry}
+                      onChange={(ev) => setJewelry(!jewelry)}
+                    />
+                    <label htmlFor="jewelry">jewelry</label>
+                  </div>{" "}
+                </CheckboxDiv>
+                <CheckboxDiv>
+                  <div>
+                    {" "}
+                    <input
+                      name="makeup"
+                      id="makeup"
+                      type="checkbox"
+                      checked={makeup}
+                      value={makeup}
+                      onChange={(ev) => setMakeup(!makeup)}
+                    />
+                    <label htmlFor="makeup">makeup artist</label>
+                  </div>
+                  <div>
+                    <input
+                      name="music"
+                      id="music"
+                      type="checkbox"
+                      checked={music}
+                      value={music}
+                      onChange={(ev) => setMusic(!music)}
+                    />
+                    <label htmlFor="music">music</label>
+                  </div>
+                  <div>
+                    <input
+                      name="painting"
+                      id="painting"
+                      type="checkbox"
+                      checked={painting}
+                      value={painting}
+                      onChange={(ev) => setPainting(!painting)}
+                    />
+                    <label htmlFor="painting">painting</label>
+                  </div>
+                  <div>
+                    <input
+                      name="photography"
+                      id="photography"
+                      type="checkbox"
+                      checked={photography}
+                      value={photography}
+                      onChange={(ev) => setPhotography(!photography)}
+                    />
+                    <label htmlFor="photography">photography</label>
+                  </div>
+                  <div>
+                    <input
+                      name="styling"
+                      id="styling"
+                      type="checkbox"
+                      checked={styling}
+                      value={styling}
+                      onChange={(ev) => setStyling(!styling)}
+                    />
+                    <label htmlFor="styling">styling</label>
+                  </div>
+                </CheckboxDiv>{" "}
+              </CheckboxInner>
+            </CheckboxSection>
+            <Section>
+              <SectionHeading>BIO</SectionHeading>
+              <LongFormP>
+                Max. 500 characters - please provide a description of your work
+                and tell us your story!
+              </LongFormP>
+              <div>
+                <LongFormText
+                  name="bio"
+                  id="bio"
+                  type="text"
+                  value={bio}
+                  onChange={(ev) => {
+                    setBio(ev.target.value);
+                    setCharactersRemaining(500 - bio.length);
+                  }}
+                  required
+                />
+                <div>{charactersRemaining}</div>
+              </div>
+            </Section>
+            <SubmitButton
               type="submit"
               onClick={(ev) => {
                 ev.preventDefault();
                 handleConfirmNewUser();
               }}
             >
-              CONFIRM
-            </button>
-          </form>
+              SUBMIT APPLICATION
+            </SubmitButton>
+          </ApplicationFormPage>
         </>
       )}
       {userStatus === "authentication-failed" && (
@@ -528,59 +579,151 @@ const Signup = () => {
         </>
       )}
       {userStatus === "user-confirmed" && (
-        <>
-          <div>
+        <ApplicationFormPage>
+          <WelcomeDiv>
             Thanks for confirming your details! Please set up your username and
             password to complete the account setup and sign in. To make any
             further changes to your account, please sign in and do so in "My
             Account".
-          </div>
-          <div>
-            <form>
-              {" "}
-              <label htmlFor="username">username:</label>
-              <input
-                name="username"
-                id="username"
-                type="text"
-                value={username}
-                onChange={(ev) => setUsername(ev.target.value)}
-              />
-              <div style={usernameExistsStyle}>
-                sorry, someone already snagged that username!
-              </div>
-              <label htmlFor="password">password:</label>
-              <input
-                name="password"
-                id="password"
-                type="password"
-                value={password}
-                onChange={(ev) => setPassword(ev.target.value)}
-              />
-              <button
-                type="submit"
-                onClick={(ev) => {
-                  ev.preventDefault();
-                  handleCreateNewUser();
-                }}
-              >
-                SIGN UP
-              </button>
-            </form>
-          </div>
-        </>
+          </WelcomeDiv>
+          {/* <form> */} <label htmlFor="username">username:</label>
+          <input
+            name="username"
+            id="username"
+            type="text"
+            value={username}
+            onChange={(ev) => setUsername(ev.target.value)}
+          />
+          <label htmlFor="password">password:</label>
+          <input
+            name="password"
+            id="password"
+            type="password"
+            value={password}
+            onChange={(ev) => setPassword(ev.target.value)}
+          />
+          <SubmitButton
+            type="submit"
+            onClick={(ev) => {
+              ev.preventDefault();
+              handleCreateNewUser();
+            }}
+          >
+            SIGN UP
+          </SubmitButton>
+          <UsernameDiv style={usernameExistsStyle}>
+            This username is already in play. Please choose a new one!
+          </UsernameDiv>
+        </ApplicationFormPage>
       )}
-      {/* {userStatus === "user-already-exists" && (
-        <>
-          <div>
-            A user account already exists for this email address, please use a
-            new one!
-          </div>
-          <Link to="/login">GO BACK</Link>
-        </>
-      )} */}
     </>
   );
 };
+
+const ApplicationFormPage = styled.form`
+  background-color: var(--mint-green);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+`;
+
+const SmallDiv = styled.div`
+  background-color: var(--pale-yellow);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin-top: 10px;
+  max-width: 500px;
+`;
+
+const Section = styled.fieldset`
+  background-color: var(--pale-yellow);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin-top: 10px;
+  max-width: 500px;
+`;
+
+const WelcomeDiv = styled.div`
+  background-color: var(--coral);
+  padding: 10px;
+  text-align: center;
+  margin-top: 10px;
+  max-width: 500px;
+`;
+
+const CheckboxSection = styled.fieldset`
+  background-color: var(--pale-yellow);
+  padding: 10px;
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+`;
+
+const SectionHeading = styled.legend`
+  background-color: var(--lavender);
+  padding: 5px;
+`;
+
+const CheckboxDiv = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-right: 20px;
+  &: last-child {
+    margin-right: 0;
+  }
+`;
+
+const CheckboxInner = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+`;
+
+const LongFormText = styled.textarea`
+  height: 200px;
+  width: 300px;
+`;
+
+const LongFormLabel = styled.label`
+  padding: 5px;
+  background-color: var(--coral);
+  margin-top: 10px;
+`;
+
+const LongFormP = styled.p`
+  padding: 5px;
+  border: 1px solid var(--coral);
+  margin-bottom: 10px;
+`;
+
+const SubmitButton = styled.button`
+  padding: 10px;
+  background-color: var(--coral);
+  outline: none;
+  border: none;
+  margin-top: 20px;
+  font-size: 18px;
+
+  &: hover {
+    cursor: pointer;
+    background-color: var(--lavender);
+  }
+`;
+
+const UsernameDiv = styled.div`
+  color: red;
+  margin-top: 10px;
+`;
 
 export default Signup;

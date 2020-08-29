@@ -118,7 +118,11 @@ const Search = styled.div`
   padding: 5px;
   color: var(--lavender);
   display: flex;
-  justify-content: flex-end;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+
+  /* justify-content: flex-end; */
   &: hover {
     background-color: var(--pale-yellow);
     color: var(--forest-green);
@@ -127,6 +131,8 @@ const Search = styled.div`
 
 const SearchInput = styled.div`
   display: none;
+  position: relative;
+
   ${Search}:hover & {
     display: flex;
   }

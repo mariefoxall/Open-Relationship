@@ -201,6 +201,7 @@ const createNewUser = async (req, res) => {
       portfolio,
       longForm,
       reasons,
+      profilePicURL,
     };
     await db.collection("users").insertOne(newUserDetails);
     res.status(201).json({
@@ -441,6 +442,67 @@ const checkConnection = async (req, res) => {
   client.close();
 };
 
+const sendMessage = async (req, res) => {
+  const client = await MongoClient(MONGO_URI, options);
+  const newMessage = req.body;
+  try {
+    await client.connect();
+    const db = client.db("personal_project");
+    await db.collection("messages").insertOne(newMessage);
+    res
+      .status(201)
+      .json({ status: 201, data: newMessage, message: "message sent" });
+  } catch (error) {
+    console.log(error.message);
+    res
+      .status(500)
+      .json({ status: 500, data: message, message: error.message });
+  }
+  client.close();
+};
+
+const getSentMessages = async (req, res) => {
+  const client = await MongoClient(MONGO_URI, options);
+  const currentUser = req.body.currentUser;
+  try {
+    await client.connect();
+    const db = client.db("personal_project");
+    const sentMessages = await db
+      .collection("messages")
+      .find({ sender: currentUser })
+      .toArray();
+    res.status(200).json({
+      status: 200,
+      sentMessages: sentMessages,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ status: 500, message: error.message });
+  }
+  client.close();
+};
+
+const getReceivedMessages = async (req, res) => {
+  const client = await MongoClient(MONGO_URI, options);
+  const currentUser = req.body.currentUser;
+  try {
+    await client.connect();
+    const db = client.db("personal_project");
+    const receivedMessages = await db
+      .collection("messages")
+      .find({ receiver: currentUser })
+      .toArray();
+    res.status(200).json({
+      status: 200,
+      receivedMessages: receivedMessages,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ status: 500, message: error.message });
+  }
+  client.close();
+};
+
 module.exports = {
   submitApplication,
   viewApplications,
@@ -456,4 +518,7 @@ module.exports = {
   makeConnection,
   updateProfilePic,
   checkConnection,
+  sendMessage,
+  getSentMessages,
+  getReceivedMessages,
 };
