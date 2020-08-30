@@ -5,6 +5,7 @@ import newuser from "./newuser.reducer";
 import currentuser from "./currentuser.reducer";
 import users from "./users.reducer";
 import profile from "./profile.reducer";
+import messages from "./messages.reducer";
 
 export default combineReducers({
   application,
@@ -12,4 +13,5 @@ export default combineReducers({
   currentuser,
   users,
   profile,
+  messages,
 });

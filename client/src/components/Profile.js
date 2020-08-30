@@ -148,6 +148,16 @@ const Profile = () => {
       : { display: "none" };
   }
 
+  let requestConnectionArray = [];
+
+  const [connectionReasons, setConnectionReasons] = React.useState({});
+  const connectionReasonsArray = Object.entries(connectionReasons);
+  connectionReasonsArray.forEach((reason) => {
+    if (reason[1]) {
+      requestConnectionArray.push(reason[0]);
+    }
+  });
+
   const handleConnection = () => {
     fetch("/make-connection", {
       method: "POST",
@@ -169,6 +179,47 @@ const Profile = () => {
       });
   };
 
+  const handleApproveConnection = () => {
+    fetch("/approve-connection", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        requestingUser: username,
+        receivingUser: currentUserInfo.username,
+      }),
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        console.log(json);
+        setRefreshPage(!refreshPage);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+  const sendConnectionApprovalMessage = () => {
+    fetch("/send-message", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sender: currentUsername,
+        receiver: username,
+        message: "Yes! Let's chat! :)",
+        timestamp: currentTime,
+      }),
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        console.log(json);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const [connectionApproved, setConnectionApproved] = React.useState(false);
+  console.log("connectionApproved", connectionApproved);
+
   const checkConnection = () => {
     fetch("/check-connection", {
       method: "POST",
@@ -183,8 +234,11 @@ const Profile = () => {
         console.log("json response from check conn", json);
         if (json.theyAlreadyAskedYou) {
           setTheyAlreadyAskedYou(true);
+          setConnectionReasons(json.data.reasons);
+          setConnectionApproved(json.data.connectionApproved);
         } else if (json.youAlreadyAskedThem) {
           setYouAlreadyAskedThem(true);
+          setConnectionApproved(json.data.connectionApproved);
         } else {
           setTheyAlreadyAskedYou(false);
           setYouAlreadyAskedThem(false);
@@ -204,6 +258,7 @@ const Profile = () => {
         receiver: username,
         message: `Hi! I'd love to connect with you. I'm interested in ${interestMessage}`,
         timestamp: currentTime,
+        invitationToConnect: true,
       }),
     })
       .then((res) => res.json())
@@ -258,18 +313,41 @@ const Profile = () => {
                         </CheckboxDiv>
                       </>
                     )}
+                    {connectionApproved && (
+                      <SectionHeading>
+                        You and {username} are connected
+                      </SectionHeading>
+                    )}
 
                     {youAlreadyAskedThem && (
                       <div>
                         You already reached out to this person! Connection
-                        pending, please be patient :)
+                        pending, please be patient!
                       </div>
                     )}
-                    {theyAlreadyAskedYou && (
-                      <div>
-                        This person has already made a request to connect! Check
-                        your messages :)
-                      </div>
+                    {theyAlreadyAskedYou && !connectionApproved && (
+                      <>
+                        <SectionHeading>
+                          {username} wants to talk:
+                        </SectionHeading>
+                        <CheckboxDiv>
+                          <div>
+                            {requestConnectionArray.map((option) => {
+                              return <Category key={option}>{option}</Category>;
+                            })}
+                          </div>
+                          <ConnectButton
+                            type="submit"
+                            onClick={(ev) => {
+                              ev.preventDefault();
+                              handleApproveConnection();
+                              sendConnectionApprovalMessage();
+                            }}
+                          >
+                            APPROVE THIS CONNECTION
+                          </ConnectButton>
+                        </CheckboxDiv>
+                      </>
                     )}
                     {currentUserStatus === "logged-in" &&
                       !theyAlreadyAskedYou &&

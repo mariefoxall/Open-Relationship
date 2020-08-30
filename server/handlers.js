@@ -422,12 +422,14 @@ const checkConnection = async (req, res) => {
     if (youAlreadyAskedThem) {
       return res.status(201).json({
         status: 201,
+        data: youAlreadyAskedThem,
         youAlreadyAskedThem: true,
         message: "you have already requested to connect with this user.",
       });
     } else if (theyAlreadyAskedYou) {
       return res.status(201).json({
         status: 201,
+        data: theyAlreadyAskedYou,
         theyAlreadyAskedYou: true,
         message:
           "this user has already requested to connect with you! Check your inbox.",
@@ -456,7 +458,7 @@ const sendMessage = async (req, res) => {
     console.log(error.message);
     res
       .status(500)
-      .json({ status: 500, data: message, message: error.message });
+      .json({ status: 500, data: newMessage, message: error.message });
   }
   client.close();
 };
@@ -503,6 +505,31 @@ const getReceivedMessages = async (req, res) => {
   client.close();
 };
 
+const approveConnection = async (req, res) => {
+  const client = await MongoClient(MONGO_URI, options);
+  const requestingUser = req.body.requestingUser;
+  const receivingUser = req.body.receivingUser;
+  try {
+    const query = {
+      requestingUser: requestingUser,
+      receivingUser: receivingUser,
+    };
+    const approveConnection = { $set: { connectionApproved: true } };
+    await client.connect();
+    const db = client.db("personal_project");
+    const r = await db
+      .collection("connections")
+      .updateOne(query, approveConnection);
+    assert.equal(1, r.matchedCount);
+    assert.equal(1, r.modifiedCount);
+    res.status(200).json({ status: 200, message: "connection successful" });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ status: 500, message: error.message });
+  }
+  client.close();
+};
+
 module.exports = {
   submitApplication,
   viewApplications,
@@ -521,4 +548,5 @@ module.exports = {
   sendMessage,
   getSentMessages,
   getReceivedMessages,
+  approveConnection,
 };

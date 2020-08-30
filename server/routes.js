@@ -16,6 +16,7 @@ const {
   sendMessage,
   getSentMessages,
   getReceivedMessages,
+  approveConnection,
 } = require("./handlers");
 
 const router = require("express").Router();
@@ -55,5 +56,7 @@ router.put("/deny-application", denyApplication);
 router.put("/confirm-user", confirmUser);
 
 router.put("/update-profile-pic", updateProfilePic);
+
+router.put("/approve-connection", approveConnection);
 
 module.exports = router;

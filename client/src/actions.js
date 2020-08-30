@@ -60,6 +60,18 @@ export const switchingProfile = () => ({
   type: "SWITCHING_PROFILE",
 });
 
-export const requestProfile = () => ({ type: "REQUEST_PROFILE," });
+export const requestProfile = () => ({ type: "REQUEST_PROFILE" });
 
 export const receiveProfile = (data) => ({ type: "RECEIVE_PROFILE", data });
+
+export const requestMessages = () => ({ type: "REQUEST_MESSAGES" });
+
+export const receiveSentMessages = (data) => ({
+  type: "RECEIVE_SENT_MESSAGES",
+  data,
+});
+
+export const receiveReceivedMessages = (data) => ({
+  type: "RECEIVE_RECEIVED_MESSAGES",
+  data,
+});
