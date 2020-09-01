@@ -14,7 +14,7 @@ const Home = () => {
   let featuredProjects = [];
   if (allProjects) {
     featuredProjects.push(allProjects[0]);
-    featuredProjects.push(allProjects[1]);
+    featuredProjects.push(allProjects[3]);
     featuredProjects.push(allProjects[2]);
   }
 
@@ -34,9 +34,9 @@ const Home = () => {
               {featuredProjects.map((project) => {
                 return (
                   <UserLink
+                    exact
                     to={`/profile/${project.username}`}
                     key={project._id}
-                    to="/scout"
                   >
                     <HoverDiv>{project.username}</HoverDiv>
                     <ProjectImg src={project.projectPicURL} />

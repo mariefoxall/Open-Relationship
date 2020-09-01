@@ -71,7 +71,6 @@ const Conversation = ({ sender }) => {
         const timeB = new Date(b.timestamp);
         return timeA - timeB;
       });
-    // need to figure out how to sort messages from timestamp
     console.log(conversationMessagesInOrder);
   }
 

@@ -129,7 +129,8 @@ const ConversationSnippet = ({ sender }) => {
   let recentMessageTime = "";
 
   if (recentMessage) {
-    recentMessageSender = recentMessage.sender;
+    recentMessageSender =
+      recentMessage.sender === currentUsername ? "you" : recentMessage.sender;
     recentMessageBody = recentMessage.message;
     recentMessageInvitationToConnect = recentMessage.invitationToConnect;
     recentMessageTime = format(

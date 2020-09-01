@@ -44,6 +44,7 @@ const MyAccount = () => {
   let thisPortfolioArray = [];
   let reasonsArray = [];
   let profilePicURL = "";
+  let admin = false;
 
   const [title, setTitle] = React.useState("");
   const [description, setDescription] = React.useState("");
@@ -53,6 +54,7 @@ const MyAccount = () => {
   if (currentUserInfo) {
     contact = currentUserInfo.contact;
     profilePicURL = currentUserInfo.profilePicURL;
+    admin = currentUserInfo.isAdmin;
 
     const portfolioObject = currentUserInfo.portfolio;
     const portfolioAllArray = Object.entries(portfolioObject);
@@ -277,6 +279,7 @@ const MyAccount = () => {
                 >
                   SIGN ME OUT
                 </SignOutButton>
+                {admin && <AdminLink to="/applicationreview">ADMIN</AdminLink>}
                 <ConnectDiv>
                   <SectionHeading>You are looking for:</SectionHeading>
                   <CheckboxDiv>
@@ -381,7 +384,7 @@ const MyAccount = () => {
                   }}
                 />
                 <ProjectPicInput type="file" onChange={fileOnChangeProject} />
-                <UploadButton
+                <ProjectButton
                   type="submit"
                   onClick={(ev) => {
                     sendProjectImage(ev);
@@ -391,7 +394,7 @@ const MyAccount = () => {
                   }}
                 >
                   upload
-                </UploadButton>{" "}
+                </ProjectButton>{" "}
               </ProjectInputForm>
               {projectsStatus === "projects-loaded" && (
                 <ProjectsList>
@@ -418,7 +421,21 @@ const MyAccount = () => {
   );
 };
 // this is styled for desktop - need something for mobile
+const AdminLink = styled(Link)`
+  margin-left: 75px;
+  padding: 10px;
+  background-color: var(--forest-green);
+  color: var(--mint-green);
+  outline: none;
+  border: none;
+  font-size: 14px;
 
+  &: hover {
+    cursor: pointer;
+    background-color: var(--mint-green);
+    color: var(--forest-green);
+  }
+`;
 const Bio = styled.div`
   padding: 5px;
   background-color: var(--mint-green);
@@ -691,6 +708,20 @@ const UploadButton = styled.button`
   left: 60px;
   top: 40px;
   padding: 10px;
+  background-color: var(--mint-green);
+  outline: none;
+  border: none;
+
+  &: hover {
+    cursor: pointer;
+    background-color: var(--lavender);
+  }
+`;
+
+const ProjectButton = styled.button`
+  width: 80px;
+  padding: 10px;
+  margin-top: 15px;
   background-color: var(--mint-green);
   outline: none;
   border: none;
