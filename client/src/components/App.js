@@ -11,7 +11,7 @@ import Signup from "./Signup";
 import NotFound from "./NotFound";
 import Profile from "./Profile";
 import { useDispatch, useSelector } from "react-redux";
-import { receiveUsers } from "../actions";
+import { receiveUsers, receiveProjects } from "../actions";
 import Messages from "./Messages";
 
 function App() {
@@ -26,8 +26,18 @@ function App() {
       .catch((error) => console.log(error));
   };
 
+  const handleProjects = () => {
+    fetch("/projects")
+      .then((res) => res.json())
+      .then((json) => {
+        dispatch(receiveProjects(json.allProjects));
+      })
+      .catch((error) => console.log(error));
+  };
+
   React.useEffect(() => {
     handleUsers();
+    handleProjects();
   }, []);
 
   return (

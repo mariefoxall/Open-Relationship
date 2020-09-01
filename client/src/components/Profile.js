@@ -2,15 +2,22 @@ import React from "react";
 import styled from "styled-components";
 import Header from "./Header";
 import { useSelector, useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
 import {
   getCurrentUserEmail,
   getCurrentUserInfo,
 } from "./reducers/currentuser.reducer";
-import { loggedInUserDetails, switchingProfile } from "../actions";
+import {
+  loggedInUserDetails,
+  switchingProfile,
+  updateReason,
+  updateCategory,
+} from "../actions";
 import { useParams } from "react-router-dom";
 import { requestProfile, receiveProfile } from "../actions";
 import { getUser } from "./reducers/profile.reducer";
-import moment from "moment";
+import blob from "../assets/blob300.png";
+import { getProjects } from "./reducers/projects.reducer";
 
 const Profile = () => {
   const [refreshPage, setRefreshPage] = React.useState(false);
@@ -33,6 +40,19 @@ const Profile = () => {
 
   let interestMessage = "";
 
+  const allProjects = useSelector(getProjects);
+  const projectsStatus = useSelector((state) => state.projects.status);
+
+  let userProjects = [];
+  if (allProjects) {
+    const userProjectsWrongOrder = allProjects.filter(
+      (project) => project.username === username
+    );
+    userProjects = userProjectsWrongOrder.reverse();
+  }
+  console.log("allProjects", allProjects);
+  console.log("userProjects", userProjects);
+
   const collaborationMessage = "collaborating on a project together";
   const tradeMessage = "trading some of our work";
   const connectingMessage = "chatting about art, life and the universe";
@@ -53,7 +73,7 @@ const Profile = () => {
     interestMessage = `${connectingMessage}.`;
   }
 
-  const currentTime = moment();
+  const currentTime = new Date();
   console.log(currentTime);
 
   //   const currentUserEmail = useSelector(getCurrentUserEmail);
@@ -119,8 +139,6 @@ const Profile = () => {
           thisPortfolioArray.push("graphic design");
         } else if (option[0] === "homeObjects") {
           thisPortfolioArray.push("home objects");
-        } else if (option[0] === "otherCategory") {
-          thisPortfolioArray.push(option[1]);
         } else {
           thisPortfolioArray.push(option[0]);
         }
@@ -270,6 +288,20 @@ const Profile = () => {
       });
   };
 
+  const toggleCategory = (target) => {
+    if (target === "home objects") {
+      dispatch(updateCategory("homeObjects"));
+    } else if (target === "graphic design") {
+      dispatch(updateCategory("graphicDesign"));
+    } else {
+      dispatch(updateCategory(target));
+    }
+  };
+
+  const toggleReason = (target) => {
+    dispatch(updateReason(target));
+  };
+
   return (
     <>
       {profileStatus === "loading" && (
@@ -289,15 +321,21 @@ const Profile = () => {
         <>
           {" "}
           <Header />
-          <MyAccount>
-            <TopDiv>
-              <div>
+          <MyAccountFullPage>
+            <MyAccount>
+              <SectionDiv>
                 <ProfilePicture>
                   <Pic
                     src={profilePicURL}
                     alt={`profile pic for ${username}`}
                   />
                 </ProfilePicture>
+              </SectionDiv>
+
+              <SectionDiv>
+                <BlobDiv>
+                  <Name>{contact.displayName}</Name>
+                </BlobDiv>{" "}
                 <ConnectDiv>
                   <div>CONNECT</div>{" "}
                   <ConnectDropdown>
@@ -305,11 +343,18 @@ const Profile = () => {
                       <>
                         <SectionHeading>{username} is into:</SectionHeading>
                         <CheckboxDiv>
-                          <div>
+                          <ReasonsDiv>
                             {thisReasonsArray.map((option) => {
-                              return <Category key={option}>{option}</Category>;
+                              return (
+                                <NoClickCategory key={option}>
+                                  {option}
+                                </NoClickCategory>
+                              );
                             })}
-                          </div>
+                          </ReasonsDiv>
+                          <LoginToConnect to="/login">
+                            login to connect!
+                          </LoginToConnect>
                         </CheckboxDiv>
                       </>
                     )}
@@ -320,10 +365,10 @@ const Profile = () => {
                     )}
 
                     {youAlreadyAskedThem && (
-                      <div>
+                      <AlreadyAskedDiv>
                         You already reached out to this person! Connection
                         pending, please be patient!
-                      </div>
+                      </AlreadyAskedDiv>
                     )}
                     {theyAlreadyAskedYou && !connectionApproved && (
                       <>
@@ -411,97 +456,128 @@ const Profile = () => {
                       )}
                   </ConnectDropdown>
                 </ConnectDiv>
-              </div>
-
-              <NameBio>
-                <div>
-                  <Name>{contact.displayName}</Name>
-                </div>
+                <WebInstaDiv>
+                  <WebInstaLink>
+                    website:{" "}
+                    <a
+                      target="blank"
+                      href={
+                        contact.website.includes("http")
+                          ? contact.website
+                          : `http://${contact.website}`
+                      }
+                    >
+                      {contact.website.includes("http://")
+                        ? contact.website.slice(7)
+                        : contact.website}
+                    </a>
+                  </WebInstaLink>
+                  <WebInstaLink>
+                    instagram:{" "}
+                    <a
+                      target="blank"
+                      href={
+                        contact.instagram.includes("@")
+                          ? `http://instagram.com/${contact.instagram.slice(1)}`
+                          : `http://instagram.com/${contact.instagram}`
+                      }
+                    >
+                      {contact.instagram.includes("@")
+                        ? contact.instagram.slice(1)
+                        : contact.instagram}
+                    </a>
+                  </WebInstaLink>
+                </WebInstaDiv>
+              </SectionDiv>
+              <SectionDiv>
+                <Heading>CATEGORIES: </Heading>
                 <div>
                   {thisPortfolioArray.map((option) => {
-                    return <Category key={option}>{option}</Category>;
+                    return (
+                      <CategoryLink
+                        key={option}
+                        to="/scout"
+                        onClick={() => {
+                          toggleCategory(option);
+                          toggleReason("All");
+                        }}
+                      >
+                        <Category>{option}</Category>
+                      </CategoryLink>
+                    );
                   })}
                 </div>
-                <Bio>{longForm.bio}</Bio>
-              </NameBio>
-            </TopDiv>
-          </MyAccount>
+              </SectionDiv>
+              <SectionDiv>
+                <Heading>BIO:</Heading>
+                <Bio>{longForm.bio}</Bio>{" "}
+              </SectionDiv>
+            </MyAccount>
+            {projectsStatus === "projects-loaded" && userProjects.length > 0 && (
+              <>
+                <TheWordProjects>PROJECTS</TheWordProjects>
+                <ProjectsDiv>
+                  <ProjectsList>
+                    {userProjects.map((project) => {
+                      return (
+                        <SectionDiv key={project._id} to="/scout">
+                          <ProjectTitleDiv>
+                            {project.projectTitle}
+                          </ProjectTitleDiv>
+                          <ProjectImg src={project.projectPicURL} />
+                          <ProjectDescriptionDiv>
+                            {project.projectDescription}
+                          </ProjectDescriptionDiv>
+                        </SectionDiv>
+                      );
+                    })}
+                  </ProjectsList>
+                </ProjectsDiv>
+              </>
+            )}
+          </MyAccountFullPage>
         </>
       )}
     </>
   );
 };
 // this is styled for desktop - need something for mobile
-const MyAccount = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-`;
 
-const Pic = styled.img`
-  height: 300px;
-  width: 300px;
-  border-radius: 50%;
-`;
-
-const Name = styled.h2`
-  background-color: var(--pale-yellow);
+const AlreadyAskedDiv = styled.div`
   padding: 5px;
 `;
+
 const Bio = styled.div`
   padding: 5px;
   background-color: var(--mint-green);
+  margin-top: 20px;
 `;
-const ProfilePicture = styled.div`
-  height: 300px;
-  width: 300px;
-  border-radius: 50%;
-  background-color: var(--coral);
+
+const BlobDiv = styled.div`
+  width: 100%;
+  height: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
+  background-image: url(${blob});
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
 `;
 
-const NameBio = styled.div`
-  width: 300px;
-  margin-left: 20px;
-`;
-
-const TopDiv = styled.div`
-  display: flex;
-`;
-
-const ConnectDiv = styled.div`
-  margin-top: 20px;
+const Category = styled.div`
   padding: 5px;
-  background-color: var(--coral);
-  outline: none;
-  border: none;
-  position: relative;
+  background-color: var(--forest-green);
+  color: white;
+  width: 100%;
 
-  &: hover {
-    cursor: pointer;
+  &:hover {
     background-color: var(--lavender);
   }
 `;
 
-const ConnectDropdown = styled.fieldset`
-  background-color: var(--pale-yellow);
-  display: none;
-  ${ConnectDiv}: hover & {
-    display: flex;
-    flex-direction: column;
-    position: absolute;
-    top: 0;
-    left: 0;
-  }
-`;
-
-const SectionHeading = styled.legend`
-  background-color: var(--lavender);
+const CategoryLink = styled(Link)`
   padding: 5px;
-  width: 100%;
 `;
 
 const CheckboxDiv = styled.div`
@@ -509,15 +585,11 @@ const CheckboxDiv = styled.div`
   flex-direction: column;
   align-items: flex-start;
   margin-right: 20px;
-  &: last-child {
-    margin-right: 0;
-  }
-`;
-
-const Option = styled.div`
   width: 100%;
-  &:hover {
-    background-color: var(--mint-green);
+  /* cursor: auto; */
+
+  &:last-child {
+    margin-right: 0;
   }
 `;
 
@@ -530,18 +602,176 @@ const ConnectButton = styled.button`
   outline: none;
   text-align: left;
 
-  &: hover {
+  &:hover {
     cursor: pointer;
     background-color: var(--mint-green);
   }
 `;
 
-const Category = styled.div`
+const ConnectDiv = styled.div`
+  margin-top: 10px;
   padding: 5px;
   background-color: var(--coral);
+  outline: none;
+  border: none;
+  position: relative;
+
   &:hover {
+    /* cursor: pointer; */
     background-color: var(--lavender);
   }
+`;
+
+const ConnectDropdown = styled.fieldset`
+  background-color: var(--pale-yellow);
+  display: none;
+  width: 100%;
+  height: 130px;
+  /* cursor: auto; */
+
+  ${ConnectDiv}:hover & {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 0;
+    left: 0;
+    /* cursor: auto; */
+  }
+`;
+
+const Heading = styled.div`
+  padding: 5px;
+  background-color: var(--pale-yellow);
+  margin-top: 20px;
+  border: 1px solid var(--forest-green);
+  color: var(--forest-green);
+`;
+
+const LoginToConnect = styled(Link)`
+  background-color: var(--pale-yellow);
+  padding: 10px 5px;
+  width: 100%;
+`;
+
+const MyAccount = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 20px;
+  @media (min-width: 640px) {
+    max-width: 70%;
+  }
+  @media (min-width: 1800px) {
+    max-width: 50%;
+  }
+`;
+
+const MyAccountFullPage = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const Name = styled.h2`
+  padding: 5px;
+`;
+
+const NoClickCategory = styled.div`
+  padding: 5px;
+  background-color: var(--coral);
+  width: 100%;
+  /* cursor: auto; */
+`;
+
+const Option = styled.div`
+  width: 100%;
+  &:hover {
+    background-color: var(--mint-green);
+  }
+`;
+
+const Pic = styled.img`
+  height: 300px;
+  width: 300px;
+  border-radius: 50%;
+`;
+
+const ProfilePicture = styled.div`
+  height: 300px;
+  width: 300px;
+  border-radius: 50%;
+  background-color: var(--coral);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const ProjectImg = styled.img`
+  width: 100%;
+`;
+const ProjectsDiv = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const ProjectsList = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 20px;
+  @media (min-width: 640px) {
+    max-width: 70%;
+  }
+  @media (min-width: 1800px) {
+    max-width: 50%;
+  }
+`;
+
+const ProjectTitleDiv = styled.h3`
+  width: 100%;
+  height: 80px;
+  text-align: center;
+  background-color: var(--lavender);
+  padding: 10px;
+`;
+
+const ProjectDescriptionDiv = styled.div`
+  width: 100%;
+  background-color: var(--mint-green);
+  padding: 5px;
+  font-size: 14px;
+`;
+
+const ReasonsDiv = styled.div`
+  width: 100%;
+  /* cursor: auto; */
+`;
+
+const SectionDiv = styled.div`
+  width: 30%;
+  min-width: 300px;
+  margin: 20px;
+`;
+
+const SectionHeading = styled.legend`
+  background-color: var(--lavender);
+  padding: 5px;
+  width: 100%;
+`;
+
+const TheWordProjects = styled.h2`
+  background-color: var(--coral);
+  padding: 10px;
+`;
+
+const WebInstaDiv = styled.div``;
+
+const WebInstaLink = styled.div`
+  padding: 5px;
+  margin: 10px 0;
+  background-color: var(--coral);
+  width: 100%;
 `;
 
 export default Profile;

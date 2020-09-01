@@ -12,10 +12,6 @@ export default function currentuserReducer(state = initialState, action) {
     case "USER_LOGGED_IN": {
       return { ...state, userInfo: action.data, status: "logged-in" };
     }
-    // case "LOGGED_IN_USER_DETAILS": {
-    //   return { ...state, userInfo: action.data, status: "logged-in-info" };
-    // }
-
     case "USER_LOGGED_OUT": {
       return initialState;
     }

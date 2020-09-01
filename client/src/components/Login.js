@@ -12,6 +12,7 @@ import {
   invalidPassword,
   userLoggedOut,
 } from "../actions";
+import Loading from "./Loading";
 
 const Login = () => {
   const [signUpCode, setSignUpCode] = React.useState("");
@@ -166,7 +167,7 @@ const Login = () => {
       )}
       {currentUserStatus === "loading" && (
         <LoginPage>
-          <div>Signing in...</div>
+          <Loading />{" "}
         </LoginPage>
       )}
       {currentUserStatus === "logged-in" && (

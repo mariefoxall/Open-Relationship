@@ -2,14 +2,16 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { moment } from "moment";
 import { getCurrentUserInfo } from "./reducers/currentuser.reducer";
+import { format } from "date-fns";
 import {
-  getSentMessages,
-  getReceivedMessages,
+  // getSentMessages,
+  // getReceivedMessages,
+  getAllMessages,
 } from "./reducers/messages.reducer";
 
 import { Link } from "react-router-dom";
 import styled from "styled-components";
-import { receiveMessages } from "../actions";
+import Loading from "./Loading";
 
 const ConversationSnippet = ({ sender }) => {
   const currentUserStatus = useSelector((state) => state.currentuser.status);
@@ -20,14 +22,29 @@ const ConversationSnippet = ({ sender }) => {
   console.log("currentUsername", currentUsername);
   let currentUserIMG = currentUserInfo ? currentUserInfo.profilePicURL : null;
 
-  const sentMessages = useSelector(getSentMessages);
-  const receivedMessages = useSelector(getReceivedMessages);
+  // const sentMessages = useSelector(getSentMessages);
+  // const receivedMessages = useSelector(getReceivedMessages);
 
-  console.log("sentMessages", sentMessages);
+  // console.log("sentMessages", sentMessages);
+  // console.log("receivedMessages", receivedMessages);
+
+  const allMessages = useSelector(getAllMessages);
+  console.log(allMessages);
+
+  const [receivedMessages, setReceivedMessages] = React.useState([]);
+  const [sentMessages, setSentMessages] = React.useState([]);
+
+  React.useEffect(() => {
+    setReceivedMessages(
+      allMessages.filter((message) => message.receiver === currentUsername)
+    );
+    setSentMessages(
+      allMessages.filter((message) => message.sender === currentUsername)
+    );
+  }, [allMessages]);
+
   console.log("receivedMessages", receivedMessages);
-
-  //   const [sentMessages, setSentMessages] = React.useState([]);
-  //   const [receivedMessages, setReceivedMessages] = React.useState([]);
+  console.log("sentMessages", sentMessages);
 
   //   const getSentMessages = () => {
   //     fetch("/get-sent-messages", {
@@ -72,7 +89,7 @@ const ConversationSnippet = ({ sender }) => {
 
   let recentMessage = {};
 
-  if (receivedMessages) {
+  if (receivedMessages && sentMessages) {
     const receivedFromSender = receivedMessages.filter(
       (message) => message.sender === sender
     );
@@ -80,8 +97,14 @@ const ConversationSnippet = ({ sender }) => {
       (message) => message.receiver === sender
     );
 
-    const conversationMessagesInOrder = receivedFromSender.concat(sentToSender);
-    //need to figure out how to sort messages from timestamp
+    const conversationMessagesInOrder = receivedFromSender
+      .concat(sentToSender)
+      .sort(function compare(a, b) {
+        const timeA = new Date(a.timestamp);
+        const timeB = new Date(b.timestamp);
+        return timeB - timeA;
+      });
+    // need to figure out how to sort messages from timestamp
     console.log(conversationMessagesInOrder);
 
     recentMessage = conversationMessagesInOrder[0];
@@ -103,21 +126,28 @@ const ConversationSnippet = ({ sender }) => {
   let recentMessageSender = "";
   let recentMessageBody = "";
   let recentMessageInvitationToConnect = "false";
+  let recentMessageTime = "";
 
   if (recentMessage) {
     recentMessageSender = recentMessage.sender;
     recentMessageBody = recentMessage.message;
     recentMessageInvitationToConnect = recentMessage.invitationToConnect;
+    recentMessageTime = format(
+      new Date(recentMessage.timestamp),
+      "MMM d yyyy - h:mm a"
+    );
   }
 
   return (
     <>
+      {messagesStatus === "messages-requested" && <Loading />}
       {messagesStatus === "messages-received" && (
         <ConversationContainer>
           <SenderName>{sender}</SenderName>
           <IndividualMessageDiv
             style={sender === recentMessageSender ? theirStyle : myStyle}
           >
+            <TimeDiv>{recentMessageTime}</TimeDiv>
             <WhoSentLast>{recentMessageSender} said:</WhoSentLast>
             <MessageBody>{recentMessageBody}</MessageBody>
             {recentMessageInvitationToConnect && (
@@ -157,12 +187,19 @@ const ProfileLink = styled(Link)`
 `;
 
 const MessageBody = styled.div`
-  margin-bottom: 10px;
+  margin: 0 8px 10px 8px;
 `;
 
 const WhoSentLast = styled.div`
   margin-bottom: 10px;
   color: var(--forest-green);
+  background-color: var(--pale-yellow);
+  padding: 5px;
+`;
+
+const TimeDiv = styled.div`
+  font-size: 10px;
+  margin: 0 8px 5px 8px;
 `;
 
 export default ConversationSnippet;

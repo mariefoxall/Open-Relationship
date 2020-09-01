@@ -3,9 +3,10 @@ require("dotenv").config();
 const bcrypt = require("bcrypt");
 
 const { MONGO_URI } = process.env;
-console.log(MONGO_URI);
+// console.log(MONGO_URI);
 const assert = require("assert");
 const { v4: uuidv4 } = require("uuid");
+const { monitorEventLoopDelay } = require("perf_hooks");
 
 const options = {
   useNewUrlParser: true,
@@ -180,6 +181,7 @@ const createNewUser = async (req, res) => {
   const longForm = req.body.longForm;
   const reasons = req.body.reasons;
   const username = req.body.username;
+  const profilePicURL = req.body.profilePicURL;
   try {
     await client.connect();
     const db = client.db("personal_project");
@@ -530,6 +532,55 @@ const approveConnection = async (req, res) => {
   client.close();
 };
 
+const getAllMessages = async (req, res) => {
+  const client = await MongoClient(MONGO_URI, options);
+  try {
+    await client.connect();
+    const db = client.db("personal_project");
+    const allMessages = await db.collection("messages").find().toArray();
+    res.status(200).json({ status: 200, allMessages: allMessages });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ status: 500, message: error.message });
+  }
+  client.close();
+};
+
+const addProject = async (req, res) => {
+  const client = await MongoClient(MONGO_URI, options);
+  const newProject = req.body;
+  try {
+    await client.connect();
+    const db = client.db("personal_project");
+    await db.collection("projects").insertOne(newProject);
+    res
+      .status(201)
+      .json({ status: 201, data: newProject, message: "project submitted!" });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({
+      status: 500,
+      data: newProject,
+      message: "sorry! this didn't work.",
+    });
+  }
+  client.close();
+};
+
+const getAllProjects = async (req, res) => {
+  const client = await MongoClient(MONGO_URI, options);
+  try {
+    await client.connect();
+    const db = client.db("personal_project");
+    const allProjects = await db.collection("projects").find().toArray();
+    res.status(200).json({ status: 200, allProjects: allProjects });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ status: 500, message: error.message });
+  }
+  client.close();
+};
+
 module.exports = {
   submitApplication,
   viewApplications,
@@ -549,4 +600,7 @@ module.exports = {
   getSentMessages,
   getReceivedMessages,
   approveConnection,
+  getAllMessages,
+  addProject,
+  getAllProjects,
 };

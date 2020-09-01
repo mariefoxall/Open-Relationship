@@ -1,11 +1,14 @@
 import React from "react";
 import styled from "styled-components";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
+import { useSelector } from "react-redux";
 import ORlogo from "../assets/ORlogo.png";
 import { FiSearch } from "react-icons/fi";
 import SearchBar from "./SearchBar";
 
 const DesktopHeader = () => {
+  const currentUserStatus = useSelector((state) => state.currentuser.status);
+
   return (
     <DesktopWrapper>
       <HomeLink to="/">
@@ -23,9 +26,25 @@ const DesktopHeader = () => {
           <FiSearch size={20} />
         </Search>
         <DesktopNav>
-          <StyledLink to="/scout">SCOUT</StyledLink>
-          <StyledLink to="/messages">MESSAGES</StyledLink>
-          <StyledLink to="/myaccount">MY ACCOUNT</StyledLink>
+          {currentUserStatus === "logged-in" && (
+            <>
+              <StyledLink to="/scout">SCOUT</StyledLink>
+              <StyledLink to="/messages">MESSAGES</StyledLink>
+              <StyledLink to="/myaccount">MY ACCOUNT</StyledLink>
+            </>
+          )}
+          {currentUserStatus === "idle" && (
+            <>
+              <StyledLink to="/scout">SCOUT</StyledLink>
+              <StyledLink to="/login">LOGIN</StyledLink>
+            </>
+          )}
+          {currentUserStatus === "loading" && (
+            <>
+              <StyledLink to="/scout">SCOUT</StyledLink>
+              <StyledLink to="/login">LOGIN</StyledLink>
+            </>
+          )}
         </DesktopNav>
       </RightSide>
     </DesktopWrapper>
@@ -64,7 +83,7 @@ const DesktopNav = styled.nav`
   align-items: flex-end;
 `;
 
-const StyledLink = styled(Link)`
+const StyledLink = styled(NavLink)`
   margin-right: 20px;
   padding: 5px;
   color: var(--mint-green);

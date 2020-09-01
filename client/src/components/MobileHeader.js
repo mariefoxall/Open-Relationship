@@ -1,11 +1,14 @@
 import React from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 import ORlogo from "../assets/ORlogo.png";
 import { FiMenu, FiSearch } from "react-icons/fi";
 import SearchBar from "./SearchBar";
 
 const MobileHeader = () => {
+  const currentUserStatus = useSelector((state) => state.currentuser.status);
+
   return (
     <MobileWrapper>
       <Visible>
@@ -30,9 +33,25 @@ const MobileHeader = () => {
             </Burger>
             <MobileNav>
               <Spacer></Spacer>
-              <StyledLink to="/scout">SCOUT</StyledLink>
-              <StyledLink to="/messaging">MESSAGES</StyledLink>
-              <StyledLink to="/myaccount">MY ACCOUNT</StyledLink>
+              {currentUserStatus === "logged-in" && (
+                <>
+                  <StyledLink to="/scout">SCOUT</StyledLink>
+                  <StyledLink to="/messaging">MESSAGES</StyledLink>
+                  <StyledLink to="/myaccount">MY ACCOUNT</StyledLink>
+                </>
+              )}
+              {currentUserStatus === "idle" && (
+                <>
+                  <StyledLink to="/scout">SCOUT</StyledLink>
+                  <StyledLink to="/login">LOGIN</StyledLink>
+                </>
+              )}
+              {currentUserStatus === "loading" && (
+                <>
+                  <StyledLink to="/scout">SCOUT</StyledLink>
+                  <StyledLink to="/login">LOGIN</StyledLink>
+                </>
+              )}
             </MobileNav>
           </Hamburger>
         </RightSide>

@@ -3,8 +3,17 @@ import styled from "styled-components";
 import Header from "./Header";
 import { useSelector, useDispatch } from "react-redux";
 import { getCurrentUserInfo } from "./reducers/currentuser.reducer";
-import { userLoggedIn, userLoggedOut } from "../actions";
-import { useHistory } from "react-router-dom";
+import {
+  userLoggedIn,
+  userLoggedOut,
+  updateCategory,
+  updateReason,
+  addProject,
+} from "../actions";
+import { useHistory, Link } from "react-router-dom";
+import blob from "../assets/blob300.png";
+import Loading from "./Loading";
+import { getProjects } from "./reducers/projects.reducer";
 
 const MyAccount = () => {
   const dispatch = useDispatch();
@@ -16,12 +25,30 @@ const MyAccount = () => {
   let currentUsername = currentUserInfo ? currentUserInfo.username : null;
   console.log("currentUsername", currentUsername);
 
+  const allProjects = useSelector(getProjects);
+  const projectsStatus = useSelector((state) => state.projects.status);
+
+  let userProjects = {};
+  if (allProjects) {
+    const userProjectsWrongOrder = allProjects.filter(
+      (project) => project.username === currentUsername
+    );
+    userProjects = userProjectsWrongOrder.reverse();
+  }
+  console.log("allProjects", allProjects);
+  console.log("userProjects", userProjects);
+
   // const [refreshPage, setRefreshPage] = React.useState('false');
 
   let contact = {};
   let thisPortfolioArray = [];
   let reasonsArray = [];
   let profilePicURL = "";
+
+  const [title, setTitle] = React.useState("");
+  const [description, setDescription] = React.useState("");
+  const [projectImage, setProjectImage] = React.useState("");
+  const [projectPicURL, setProjectPicURL] = React.useState("");
 
   if (currentUserInfo) {
     contact = currentUserInfo.contact;
@@ -63,6 +90,10 @@ const MyAccount = () => {
     setImage(ev.target.files[0]);
   };
 
+  const fileOnChangeProject = (ev) => {
+    setProjectImage(ev.target.files[0]);
+  };
+
   const [newProfilePicURL, setNewProfilePicURL] = React.useState("");
   console.log(newProfilePicURL);
 
@@ -82,6 +113,31 @@ const MyAccount = () => {
       .then((res) => res.json())
       .then((json) => {
         console.log(json);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const postProject = (url) => {
+    console.log("url", url);
+    console.log("currentUsername inside postProfilePic", currentUsername);
+    fetch("/add-project", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: currentUsername,
+        projectPicURL: url,
+        projectTitle: title,
+        projectDescription: description,
+      }),
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        console.log(json);
+        dispatch(addProject(json.data));
       })
       .catch((error) => {
         console.log(error);
@@ -110,12 +166,51 @@ const MyAccount = () => {
       });
   };
 
+  const sendProjectImage = (ev) => {
+    ev.preventDefault();
+    const data = new FormData();
+    data.append("file", projectImage);
+    //could append title, body, other related info if we had other inputs - good for posts about projects
+    data.append("upload_preset", "open-relationship");
+    data.append("cloud_name", "open-relationship");
+
+    fetch("https://api.cloudinary.com/v1_1/open-relationship/image/upload", {
+      method: "POST",
+      body: data,
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        console.log("json response from cloudinary upload", json);
+        setProjectPicURL(json.url);
+        postProject(json.url);
+        //set new pic in temp storage
+        //post new pic to database
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const toggleCategory = (target) => {
+    if (target === "home objects") {
+      dispatch(updateCategory("homeObjects"));
+    } else if (target === "graphic design") {
+      dispatch(updateCategory("graphicDesign"));
+    } else {
+      dispatch(updateCategory(target));
+    }
+  };
+
+  const toggleReason = (target) => {
+    dispatch(updateReason(target));
+  };
+
   return (
     <>
       {currentUserStatus === "idle" && (
         <>
           <Header />
-          <MyAccountDiv>
+          <MyAccountFullPage>
             <LoginDiv>
               <LoginButton
                 onClick={(ev) => {
@@ -126,16 +221,22 @@ const MyAccount = () => {
                 LOG IN
               </LoginButton>
             </LoginDiv>
-          </MyAccountDiv>
+          </MyAccountFullPage>
+        </>
+      )}
+      {currentUserStatus === "loading" && (
+        <>
+          <Header />
+          <Loading />{" "}
         </>
       )}
       {currentUserStatus === "logged-in" && (
         <>
           {" "}
           <Header />
-          <MyAccountDiv>
-            <TopDiv>
-              <div>
+          <MyAccountFullPage>
+            <MyAccountDiv>
+              <SectionDiv>
                 <ProfilePicture>
                   {profilePicURL && profilePicURL.length > 0 && (
                     <Pic
@@ -161,83 +262,221 @@ const MyAccount = () => {
                       </UploadButton>
                     </ProfilePicInputDiv>
                   </HoverDiv>
-                </ProfilePicture>
+                </ProfilePicture>{" "}
+              </SectionDiv>
+              <SectionDiv>
+                <BlobDiv>
+                  <Name>{contact.displayName}</Name>
+                </BlobDiv>{" "}
+                <SignOutButton
+                  type="submit"
+                  onClick={(ev) => {
+                    ev.preventDefault();
+                    dispatch(userLoggedOut());
+                  }}
+                >
+                  SIGN ME OUT
+                </SignOutButton>
                 <ConnectDiv>
-                  <ReasonsDiv>OPEN TO:</ReasonsDiv>
-                  {reasonsArray.map((reason) => {
-                    return <Category key={reason}>{reason}</Category>;
-                  })}
-                </ConnectDiv>
-              </div>
-
-              <NameBio>
-                <Name>
-                  {contact.displayName}
-                  <SignOutButton
-                    type="submit"
-                    onClick={(ev) => {
-                      ev.preventDefault();
-                      dispatch(userLoggedOut());
-                    }}
-                  >
-                    SIGN ME OUT
-                  </SignOutButton>
-                </Name>
-                <div></div>
+                  <SectionHeading>You are looking for:</SectionHeading>
+                  <CheckboxDiv>
+                    <ReasonsDiv>
+                      {reasonsArray.map((reason) => {
+                        return (
+                          <ReasonLink
+                            key={reason}
+                            to="/scout"
+                            onClick={() => {
+                              toggleCategory("All");
+                              toggleReason(reason);
+                            }}
+                          >
+                            <Category>{reason}</Category>
+                          </ReasonLink>
+                        );
+                      })}{" "}
+                    </ReasonsDiv>
+                  </CheckboxDiv>
+                </ConnectDiv>{" "}
+              </SectionDiv>
+              <SectionDiv>
+                <Heading>CATEGORIES: </Heading>
                 <div>
                   {" "}
                   {thisPortfolioArray.map((option) => {
-                    return <Category key={option}>{option}</Category>;
+                    return (
+                      <CategoryLink
+                        key={option}
+                        to="/scout"
+                        onClick={() => {
+                          toggleCategory(option);
+                          toggleReason("All");
+                        }}
+                      >
+                        <Category>{option}</Category>
+                      </CategoryLink>
+                    );
                   })}
-                </div>
+                </div>{" "}
+                <WebInstaDiv>
+                  <WebInstaLink>
+                    website:{" "}
+                    <a
+                      target="blank"
+                      href={
+                        contact.website.includes("http")
+                          ? contact.website
+                          : `http://${contact.website}`
+                      }
+                    >
+                      {contact.website.includes("http://")
+                        ? contact.website.slice(7)
+                        : contact.website}
+                    </a>
+                  </WebInstaLink>
+                  <WebInstaLink>
+                    instagram:{" "}
+                    <a
+                      target="blank"
+                      href={
+                        contact.instagram.includes("@")
+                          ? `http://instagram.com/${contact.instagram.slice(1)}`
+                          : `http://instagram.com/${contact.instagram}`
+                      }
+                    >
+                      {contact.instagram.includes("@")
+                        ? contact.instagram.slice(1)
+                        : contact.instagram}
+                    </a>
+                  </WebInstaLink>
+                </WebInstaDiv>
+              </SectionDiv>
+              <SectionDiv>
+                <Heading>BIO:</Heading>
+
                 <Bio>{currentUserInfo.longForm.bio}</Bio>
-              </NameBio>
-            </TopDiv>
-            <div>Add images of your work</div>
-          </MyAccountDiv>
+              </SectionDiv>{" "}
+            </MyAccountDiv>{" "}
+            <ProjectsDiv>
+              <ProjectInputForm>
+                <ProjectUploadTitle>UPLOAD A NEW PROJECT</ProjectUploadTitle>
+                <ProjectInputFieldTitle
+                  type="text"
+                  name="title"
+                  id="title"
+                  placeholder="title"
+                  value={title}
+                  onChange={(ev) => {
+                    setTitle(ev.target.value);
+                  }}
+                />
+                <ProjectInputField
+                  type="text"
+                  name="description"
+                  id="description"
+                  placeholder="description"
+                  value={description}
+                  onChange={(ev) => {
+                    setDescription(ev.target.value);
+                  }}
+                />
+                <ProjectPicInput type="file" onChange={fileOnChangeProject} />
+                <UploadButton
+                  type="submit"
+                  onClick={(ev) => {
+                    sendProjectImage(ev);
+                    setProjectImage({});
+                    setTitle("");
+                    setDescription("");
+                  }}
+                >
+                  upload
+                </UploadButton>{" "}
+              </ProjectInputForm>
+              {projectsStatus === "projects-loaded" && (
+                <ProjectsList>
+                  {userProjects.map((project) => {
+                    return (
+                      <SectionDiv key={project._id} to="/scout">
+                        <ProjectTitleDiv>
+                          {project.projectTitle}
+                        </ProjectTitleDiv>
+                        <ProjectImg src={project.projectPicURL} />
+                        <ProjectDescriptionDiv>
+                          {project.projectDescription}
+                        </ProjectDescriptionDiv>
+                      </SectionDiv>
+                    );
+                  })}
+                </ProjectsList>
+              )}
+            </ProjectsDiv>
+          </MyAccountFullPage>
         </>
       )}
     </>
   );
 };
 // this is styled for desktop - need something for mobile
-const MyAccountDiv = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-`;
 
-const Name = styled.h2`
-  background-color: var(--pale-yellow);
-  padding: 5px;
-  border: 1px solid var(--coral);
-`;
 const Bio = styled.div`
   padding: 5px;
   background-color: var(--mint-green);
 `;
-const ProfilePicture = styled.div`
-  height: 300px;
-  width: 300px;
-  border-radius: 50%;
+
+const BlobDiv = styled.div`
+  width: 100%;
+  height: 50%;
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: var(--coral);
-  position: relative;
+  background-image: url(${blob});
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
 `;
 
-const ProfilePicInput = styled.input`
-  /* display: flex;
-  flex-direction: column;
-  align-items: center; */
-  text-align: center;
-  font-family: "Spartan";
-  & > button {
-    background-color: var(--coral);
+const Category = styled.div`
+  padding: 5px;
+  background-color: var(--coral);
+  &:hover {
+    background-color: var(--lavender);
+    cursor: pointer;
   }
+`;
+
+const CategoryLink = styled(Link)`
+  padding: 5px;
+`;
+
+const ReasonLink = styled(Link)``;
+
+const ConnectDiv = styled.div`
+  background-color: var(--mint-green);
+  margin-top: 20px;
+  outline: none;
+  border: none;
+`;
+
+const CheckboxDiv = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-right: 20px;
+  width: 100%;
+  /* cursor: auto; */
+
+  &:last-child {
+    margin-right: 0;
+  }
+`;
+
+const Heading = styled.div`
+  padding: 5px;
+  background-color: var(--pale-yellow);
+  margin-top: 20px;
+  border: 1px solid var(--forest-green);
+  color: var(--forest-green);
 `;
 
 const HoverDiv = styled.div`
@@ -249,72 +488,7 @@ const HoverDiv = styled.div`
   /* border: 1px solid black; */
 `;
 
-const Pic = styled.img`
-  height: 300px;
-  width: 300px;
-  border-radius: 50%;
-  ${ProfilePicture}:hover & {
-    opacity: 0.5;
-  }
-`;
-
-const UpdateDiv = styled.div`
-  /* height: 40px; */
-  text-align: center;
-  background-color: var(--mint-green);
-  padding: 5px;
-  ${HoverDiv}:hover & {
-    display: none;
-  }
-`;
-
-const ProfilePicInputDiv = styled.div`
-  display: none;
-  ${HoverDiv}:hover & {
-    position: absolute;
-    left: 0;
-    top: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-  }
-`;
-
-const UploadButton = styled.button`
-  width: 80px;
-  position: absolute;
-  left: 60px;
-  top: 40px;
-  padding: 10px;
-  background-color: var(--mint-green);
-  outline: none;
-  border: none;
-
-  &: hover {
-    cursor: pointer;
-    background-color: var(--lavender);
-  }
-`;
-
-const NameBio = styled.div`
-  width: 300px;
-  margin-left: 20px;
-`;
-
-const TopDiv = styled.div`
-  display: flex;
-`;
-
-const Category = styled.div`
-  padding: 5px;
-  background-color: var(--coral);
-  &:hover {
-    background-color: var(--lavender);
-    cursor: pointer;
-  }
-`;
+const IndividualProjectDiv = styled.div``;
 
 const LoginButton = styled.button`
   width: 80px;
@@ -336,13 +510,139 @@ const LoginDiv = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-top: 20px;
 `;
 
-const ConnectDiv = styled.div`
+const MyAccountDiv = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 20px;
+  @media (min-width: 640px) {
+    max-width: 70%;
+  }
+  @media (min-width: 1800px) {
+    max-width: 50%;
+  }
+`;
+const MyAccountFullPage = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const Name = styled.h2`
+  padding: 5px;
+`;
+
+const ProfilePicInput = styled.input`
+  /* display: flex;
+  flex-direction: column;
+  align-items: center; */
+  text-align: center;
+  font-family: "Spartan";
+  & > button {
+    background-color: var(--coral);
+  }
+`;
+
+const ProfilePicture = styled.div`
+  height: 300px;
+  width: 300px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--coral);
+  position: relative;
+`;
+const ProjectInputForm = styled.form`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const ProjectInputField = styled.textarea`
+  width: 300px;
+  height: 150px;
+  margin-bottom: 20px;
+`;
+
+const ProjectInputFieldTitle = styled.textarea`
+  width: 300px;
+  height: 50px;
+  margin: 10px;
+`;
+
+const ProjectUploadTitle = styled.h2`
+  background-color: var(--coral);
+  padding: 5px;
+`;
+
+const ProjectImg = styled.img`
+  width: 100%;
+`;
+const ProjectsDiv = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const ProjectPicInput = styled.input`
+  text-align: center;
+  width: 200px;
+`;
+
+const ProjectsList = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 20px;
+  @media (min-width: 640px) {
+    max-width: 70%;
+  }
+  @media (min-width: 1800px) {
+    max-width: 50%;
+  }
+`;
+
+const ProjectTitleDiv = styled.h3`
+  width: 100%;
+  height: 80px;
+  text-align: center;
+  background-color: var(--lavender);
+  padding: 5px;
+`;
+
+const ProjectDescriptionDiv = styled.div`
+  width: 100%;
   background-color: var(--mint-green);
-  margin-top: 20px;
-  outline: none;
-  border: none;
+  padding: 5px;
+  font-size: 14px;
+`;
+
+const Pic = styled.img`
+  height: 300px;
+  width: 300px;
+  border-radius: 50%;
+  ${ProfilePicture}:hover & {
+    opacity: 0.5;
+  }
+`;
+
+const ProfilePicInputDiv = styled.div`
+  display: none;
+  ${HoverDiv}:hover & {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
 `;
 
 const ReasonsDiv = styled.div`
@@ -351,15 +651,63 @@ const ReasonsDiv = styled.div`
 
 const SignOutButton = styled.button`
   width: 150px;
-  padding: 5px;
-  background-color: var(--lavender);
+  padding: 10px;
+  background-color: var(--forest-green);
+  color: var(--mint-green);
   outline: none;
   border: none;
 
   &: hover {
     cursor: pointer;
     background-color: var(--mint-green);
+    color: var(--forest-green);
   }
+`;
+
+const SectionDiv = styled.div`
+  width: 30%;
+  min-width: 300px;
+  margin: 20px;
+`;
+
+const SectionHeading = styled.legend`
+  background-color: var(--lavender);
+  padding: 5px;
+  width: 100%;
+`;
+const UpdateDiv = styled.div`
+  /* height: 40px; */
+  text-align: center;
+  background-color: var(--mint-green);
+  padding: 5px;
+  ${HoverDiv}:hover & {
+    display: none;
+  }
+`;
+
+const UploadButton = styled.button`
+  width: 80px;
+  position: absolute;
+  left: 60px;
+  top: 40px;
+  padding: 10px;
+  background-color: var(--mint-green);
+  outline: none;
+  border: none;
+
+  &: hover {
+    cursor: pointer;
+    background-color: var(--lavender);
+  }
+`;
+
+const WebInstaDiv = styled.div``;
+
+const WebInstaLink = styled.div`
+  padding: 5px;
+  margin: 10px 0;
+  background-color: var(--coral);
+  width: 100%;
 `;
 
 export default MyAccount;

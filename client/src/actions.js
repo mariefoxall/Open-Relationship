@@ -75,3 +75,45 @@ export const receiveReceivedMessages = (data) => ({
   type: "RECEIVE_RECEIVED_MESSAGES",
   data,
 });
+
+export const updateCategory = (category) => ({
+  type: "UPDATE_CATEGORY",
+  category,
+});
+
+export const updateReason = (reason) => ({
+  type: "UPDATE_REASON",
+  reason,
+});
+
+export const resetFilters = () => ({
+  type: "RESET_FILTERS",
+});
+
+export const sendChat = () => ({
+  type: "SEND_CHAT",
+});
+
+export const resetChat = () => ({
+  type: "RESET_CHAT",
+});
+
+export const addMessage = (data) => ({
+  type: "ADD_MESSAGE",
+  data,
+});
+
+export const receiveAllMessages = (data) => ({
+  type: "RECEIVE_ALL_MESSAGES",
+  data,
+});
+
+export const receiveProjects = (data) => ({
+  type: "RECEIVE_PROJECTS",
+  data,
+});
+
+export const addProject = (data) => ({
+  type: "ADD_PROJECT",
+  data,
+});

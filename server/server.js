@@ -9,6 +9,8 @@ const server = http.Server(app);
 const io = socket(server);
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
+const { sendMessage } = require("./handlers");
+// const moment = require("moment");
 
 // const helmet = require("helmet");
 // const fs = require("fs");
@@ -22,10 +24,13 @@ app.use(morgan("dev"));
 // app.use(helmet());
 app.use(require("./routes"));
 
+// const currentTime = moment();
+
 io.on("connection", (socket) => {
   socket.emit("connection-message", "hi you are connected");
   socket.on("send chat message", (msg) => {
-    console.log(msg);
+    console.log("this is the message sent from chat", msg);
+    io.emit("push-message-to-conversation", msg);
   });
 });
 
