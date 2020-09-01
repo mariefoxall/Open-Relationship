@@ -31,6 +31,7 @@ const Home = () => {
           {projectsStatus === "loading" && <Loading />}
           {projectsStatus === "projects-loaded" && (
             <>
+              <FeaturedProjectsTitle>FEATURED PROJECTS</FeaturedProjectsTitle>
               {featuredProjects.map((project) => {
                 return (
                   <UserLink
@@ -74,6 +75,15 @@ const StyledLink = styled(Link)`
   &:hover {
     background-color: var(--mint-green);
   }
+`;
+
+const FeaturedProjectsTitle = styled.div`
+  padding: 20px;
+  margin: 20px;
+  background-color: var(--forest-green);
+  font-size: 20px;
+  font-weight: bold;
+  color: white;
 `;
 
 const FeaturedProjectsDiv = styled.div`

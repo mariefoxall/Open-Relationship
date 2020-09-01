@@ -13,6 +13,7 @@ import { getCurrentUserInfo } from "./reducers/currentuser.reducer";
 import { getFilterCategory, getFilterReason } from "./reducers/filter.reducer";
 import { getUsers } from "./reducers/users.reducer";
 import OPENCAGE_API_KEY from "./secret";
+import Loading from "./Loading";
 
 const opencage = require("opencage-api-client");
 require("dotenv").config();
@@ -187,7 +188,7 @@ const Scout = () => {
   return (
     <>
       <Header />
-      {usersStatus === "loading" && <div>LOADING...</div>}
+      {usersStatus === "loading" && <Loading />}
       {usersStatus === "users-loaded" && (
         <ScoutPageDiv>
           <ScoutTitle>SCOUT NEW CONNECTIONS</ScoutTitle>
@@ -261,8 +262,6 @@ const Scout = () => {
           </FiltersDiv>
 
           <ShowAllUsersDiv>
-            {/* {activeDistance === "anywhere" && (
-              <> */}
             {locationFilterArray.map((user) => {
               return (
                 <UserLink key={user._id} to={`/profile/${user.username}`}>
@@ -298,109 +297,6 @@ const Scout = () => {
                 </UserLink>
               );
             })}
-            {/* </>
-            )}
-            {activeDistance === "myCountry" && (
-              <>
-                {reasonsFilterArray.map((user) => {
-                  return (
-                    <>
-                      {user.contact.location.country ===
-                        currentUserInfo.contact.location.country && (
-                        <UserLink
-                          key={user._id}
-                          to={`/profile/${user.username}`}
-                        >
-                          <UserDiv>
-                            <UserIMG
-                              src={user.profilePicURL}
-                              alt={`profile pic for ${user.username}`}
-                            />
-                            <Name>
-                              <h2>{user.username}</h2>
-                            </Name>
-                          </UserDiv>
-                          <HoverDiv>
-                            {Object.entries(user.portfolio)
-                              .filter((option) => option[1])
-                              .map((option) => {
-                                return (
-                                  <div key={option[0]}>
-                                    {option[0] === "graphicDesign" && (
-                                      <Category>graphic design</Category>
-                                    )}
-                                    {option[0] === "homeObjects" && (
-                                      <Category>home objects</Category>
-                                    )}
-                                    {option[0] !== "graphicDesign" &&
-                                      option[0] !== "homeObjects" && (
-                                        <Category>{option[0]}</Category>
-                                      )}
-                                  </div>
-                                );
-                              })}
-                          </HoverDiv>
-                        </UserLink>
-                      )}
-                    </>
-                  );
-                })}
-              </>
-            )}{" "}
-            {activeDistance !== "myCountry" && activeDistance !== "anywhere" && (
-              <>
-                {reasonsFilterArray.map(async (user) => {
-                  const thisUserPosition = await userPosition(user);
-                  console.log("thisUserPosition ****", thisUserPosition);
-                  const distance = getDistance(
-                    thisUserPosition,
-                    currentUserPosition
-                  );
-                  console.log("distance here *********************", distance);
-                  return (
-                    <>
-                      {distance < Number(activeDistance) && (
-                        <UserLink
-                          key={user._id}
-                          to={`/profile/${user.username}`}
-                        >
-                          <UserDiv>
-                            <UserIMG
-                              src={user.profilePicURL}
-                              alt={`profile pic for ${user.username}`}
-                            />
-                            <Name>
-                              <h2>{user.username}</h2>
-                            </Name>
-                          </UserDiv>
-                          <HoverDiv>
-                            {Object.entries(user.portfolio)
-                              .filter((option) => option[1])
-                              .map((option) => {
-                                console.log("option in Scout", option);
-                                return (
-                                  <div key={option[0]}>
-                                    {option[0] === "graphicDesign" && (
-                                      <Category>graphic design</Category>
-                                    )}
-                                    {option[0] === "homeObjects" && (
-                                      <Category>home objects</Category>
-                                    )}
-                                    {option[0] !== "graphicDesign" &&
-                                      option[0] !== "homeObjects" && (
-                                        <Category>{option[0]}</Category>
-                                      )}
-                                  </div>
-                                );
-                              })}
-                          </HoverDiv>
-                        </UserLink>
-                      )}
-                    </>
-                  );
-                })}
-              </>
-            )} */}
           </ShowAllUsersDiv>
         </ScoutPageDiv>
       )}

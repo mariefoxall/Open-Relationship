@@ -18,6 +18,7 @@ import { requestProfile, receiveProfile } from "../actions";
 import { getUser } from "./reducers/profile.reducer";
 import blob from "../assets/blob300.png";
 import { getProjects } from "./reducers/projects.reducer";
+import Loading from "./Loading";
 
 const Profile = () => {
   const [refreshPage, setRefreshPage] = React.useState(false);
@@ -307,13 +308,13 @@ const Profile = () => {
       {profileStatus === "loading" && (
         <>
           <Header />
-          <div>LOADING...</div>
+          <Loading />
         </>
       )}
       {profileStatus === "profile-requested" && (
         <>
           <Header />
-          <div>Loading profile...</div>
+          <Loading />
         </>
       )}
 
