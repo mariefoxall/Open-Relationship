@@ -36,7 +36,7 @@ const MobileHeader = () => {
               {currentUserStatus === "logged-in" && (
                 <>
                   <StyledLink to="/scout">SCOUT</StyledLink>
-                  <StyledLink to="/messaging">MESSAGES</StyledLink>
+                  <StyledLink to="/messages">MESSAGES</StyledLink>
                   <StyledLink to="/myaccount">MY ACCOUNT</StyledLink>
                 </>
               )}

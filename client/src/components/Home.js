@@ -27,11 +27,11 @@ const Home = () => {
       <HomeWrapper>
         <StyledLink to="/scout">SCOUT NEW CONNECTIONS</StyledLink>
         <StyledLink to="/login">LOGIN/SIGN UP</StyledLink>
+        <FeaturedProjectsTitle>FEATURED PROJECTS</FeaturedProjectsTitle>
         <FeaturedProjectsDiv>
           {projectsStatus === "loading" && <Loading />}
           {projectsStatus === "projects-loaded" && (
             <>
-              <FeaturedProjectsTitle>FEATURED PROJECTS</FeaturedProjectsTitle>
               {featuredProjects.map((project) => {
                 return (
                   <UserLink
