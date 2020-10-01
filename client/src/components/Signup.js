@@ -11,6 +11,10 @@ import {
   userLoggedIn,
   loggingIn,
 } from "../actions";
+import OPENCAGE_API_KEY from "./secret";
+
+const opencage = require("opencage-api-client");
+require("dotenv").config();
 
 const Signup = () => {
   const dispatch = useDispatch();
@@ -29,6 +33,7 @@ const Signup = () => {
   const [phone, setPhone] = React.useState("");
   const [country, setCountry] = React.useState("");
   const [postal, setPostal] = React.useState("");
+  const [geo, setGeo] = React.useState({});
   const [website, setWebsite] = React.useState("");
   const [instagram, setInstagram] = React.useState("");
   //portfolio options
@@ -62,6 +67,23 @@ const Signup = () => {
 
   const [charactersRemaining, setCharactersRemaining] = React.useState(500);
 
+  const getPositionFromAddress = async (postal, country) => {
+    const requestObj = {
+      key: OPENCAGE_API_KEY,
+      q: `${postal}, ${country}`,
+    };
+    return await opencage
+      .geocode(requestObj)
+      .then((data) => {
+        console.log(data.results[0].geometry);
+        setGeo(data.results[0].geometry);
+        return data.results[0].geometry;
+      })
+      .catch((error) => {
+        return "error", error.message;
+      });
+  };
+
   React.useEffect(() => {
     if (userStatus === "signing-up" && newUserDetails) {
       console.log(newUserDetails);
@@ -69,6 +91,8 @@ const Signup = () => {
       const portfolio = newUserDetails.portfolio;
       const longForm = newUserDetails.longForm;
       const reasons = newUserDetails.reasons;
+
+      getPositionFromAddress(contact.location.postal, contact.location.country);
 
       //contact info
       setDisplayName(contact.displayName);
@@ -159,7 +183,7 @@ const Signup = () => {
           fullName: { firstName, lastName },
           email,
           phone,
-          location: { country, postal },
+          location: { country, postal, geo },
           website,
           instagram,
         },

@@ -21,8 +21,7 @@ require("dotenv").config();
 const Scout = () => {
   const dispatch = useDispatch();
 
-  const getPositionFromAddress = async (postal, country) => {
-    console.log("hello i am in the function");
+  const getPositionFromAddress = async (postal, country, username) => {
     const requestObj = {
       key: OPENCAGE_API_KEY,
       q: `${postal}, ${country}`,
@@ -30,7 +29,7 @@ const Scout = () => {
     return await opencage
       .geocode(requestObj)
       .then((data) => {
-        console.log(data.results[0].geometry);
+        console.log(username, data.results[0].geometry);
         return data.results[0].geometry;
       })
       .catch((error) => {
@@ -75,18 +74,11 @@ const Scout = () => {
 
   const currentUserInfo = useSelector(getCurrentUserInfo);
 
-  const [currentUserPosition, setCurrentUserPosition] = React.useState({});
+  let currentUserPosition = {};
 
-  React.useEffect(() => {
-    if (currentUserInfo) {
-      getPositionFromAddress(
-        currentUserInfo.contact.location.postal,
-        currentUserInfo.contact.location.country
-      ).then((position) => {
-        setCurrentUserPosition(position);
-      });
-    }
-  }, [currentUserInfo]);
+  if (currentUserInfo) {
+    currentUserPosition = currentUserInfo.contact.location.geo;
+  }
 
   const getDistance = (pos1, pos2) => {
     var R = 6371; // Radius of the earth in km
@@ -122,44 +114,6 @@ const Scout = () => {
 
   let locationFilterArray = reasonsFilterArray;
 
-  const userDistance = async (user, currentUserPosition) => {
-    const thisUserPosition = await getPositionFromAddress(
-      user.contact.location.postal,
-      user.contact.location.country
-    );
-    return await getDistance(currentUserPosition, thisUserPosition);
-  };
-
-  const userPosition = async (user) => {
-    return await getPositionFromAddress(
-      user.contact.location.postal,
-      user.contact.location.country
-    );
-  };
-
-  let locationFilterArrayFive = [];
-  let locationFilterArrayFifty = [];
-  let locationFilterArrayHundred = [];
-  for (const user of reasonsFilterArray) {
-    userPosition(user)
-      .then((position) => {
-        console.log("position inside for of loop after then", position);
-        console.log("currentUserPosition inside for of", currentUserPosition);
-        return getDistance(position, currentUserPosition);
-      })
-      .then((distance) => {
-        console.log("distance inside for of loop after then then", distance);
-        if (distance < 100) {
-          locationFilterArrayHundred.push(user);
-        } else if (distance < 50) {
-          locationFilterArrayFifty.push(user);
-        } else if (distance < 5) {
-          locationFilterArrayFive.push(user);
-        }
-      });
-  }
-  console.log("locationFilterArray", locationFilterArray);
-
   if (users && currentUserInfo) {
     if (activeDistance === "anywhere") {
       locationFilterArray = reasonsFilterArray;
@@ -170,16 +124,14 @@ const Scout = () => {
           currentUserInfo.contact.location.country
         );
       });
-    } else if (activeDistance === "100") {
-      locationFilterArray = locationFilterArrayHundred;
-    } else if (activeDistance === "50") {
-      locationFilterArray = locationFilterArrayFifty;
-    } else if (activeDistance === "5") {
-      locationFilterArray = locationFilterArrayFive;
+    } else {
+      locationFilterArray = reasonsFilterArray.filter(
+        (user) =>
+          getDistance(currentUserPosition, user.contact.location.geo) <
+          activeDistance
+      );
     }
   }
-
-  console.log("locationFilterArray HERE IT IS", locationFilterArray);
 
   const locationStyle = currentUserInfo
     ? { display: "flex", margin: "10px", padding: "10px", alignItems: "center" }
